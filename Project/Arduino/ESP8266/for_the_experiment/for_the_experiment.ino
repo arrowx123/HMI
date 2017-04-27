@@ -18,6 +18,12 @@ Arduino IP: 132.206.74.137
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <OSCData.h>
+#include <TimedAction.h>
+
+
+//function definition
+void set_erm();
+
 
 // The parameter of the wifi connection
 //const int size = 1010;
@@ -36,6 +42,9 @@ char msgChar[100];
 
 String OSCIP = "132.206.74.142";
 char addressPattern[] = "/test";
+
+TimedAction motor_thread = TimedAction(250, set_erm);
+
 
 // Air Intensity Level 0 ~ 3
 int airIntensityLevelNum = 4;
@@ -77,6 +86,12 @@ const IPAddress outIp(132, 206, 74, 142);       // remote IP of your computer
 //const unsigned int localPort = 8888;        // local port to listen for OSC packets (actually not used for sending)
 
 bool useEAPInit = false;
+
+
+void set_erm(){
+  
+  
+}
 
 
 void setPin() {
@@ -419,7 +434,7 @@ void process_received_osc(String msg) {
 
     if(msg == osc_msg[0]){
 
-      
+        
     }
     else if(msg == osc_msg[1]){
       
@@ -438,7 +453,7 @@ void OSC_receive() {
   int comma_pos = 0;
 
   if (size <= 0) 
-  break;
+  return;
     for(int i = 0; i < size; i ++) {
       unsigned int tmp = Udp.read();
       _string = String(_string + String(char(tmp)));
