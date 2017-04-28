@@ -32,7 +32,7 @@ void create_rec() {
     recs.add(new Rec(20, 20, 50, 50));
     recs.add(new Rec(80, 20, 50, 50));
     recs.add(new Rec(140, 20, 50, 50));
-    recs.add( new Rec(200, 50, 20, 20) );
+    recs.add( new Rec(200, 20, 50, 50) );
     //recs.add( new Rec(80, 20, 50, 20) );
     //recs.add( new Rec(20, 80, 20, 50) );
     //recs.add( new Rec(80, 50, 50, 20) );
