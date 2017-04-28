@@ -23,6 +23,7 @@ Arduino IP: 132.206.74.137
 
 //function definition
 void set_erm();
+void motor_control(int control);
 
 
 // The parameter of the wifi connection
@@ -34,7 +35,7 @@ String requests[] = {"setLedValue", "setOSCIP",
                      "setOSCRemotePort", "setOSCLocalPort",
                      "showSetting"};
 
-String osc_msg[] = {"couple", "rotate"};                    
+String osc_msg[] = {"couple", "rotate", "couple_rotate", "stop"};
 
 OSCErrorCode error;
 char OSCIP_char[20];
@@ -50,6 +51,7 @@ TimedAction motor_thread = TimedAction(250, set_erm);
 int airIntensityLevelNum = 4;
 int airIntensity = -1;
 int pwmValue[] = {255, 511, 767, 1023};
+int pwm_value[] = {0, 1023};
 
 // Rotation direction
 int rotationDirectionNum = 2;
@@ -85,12 +87,33 @@ const IPAddress outIp(132, 206, 74, 142);       // remote IP of your computer
 //const unsigned int outPort = 9999;          // remote port to receive OSC
 //const unsigned int localPort = 8888;        // local port to listen for OSC packets (actually not used for sending)
 
-bool useEAPInit = false;
 
+//motor_mode 0: with intervals
+//motor_mode 1: without intervals
+//motor_switch: select the pwm value
+int motor_switch = 0;
+int motor_mode = 0;
 
-void set_erm(){
-  
-  
+void set_erm() {
+
+//    Serial.println("In the set_erm() funcion.");
+    if (motor_mode == 0) {
+        if (motor_switch == 0) {
+            motor_switch = 1;
+        } else {
+
+            motor_switch = 0;
+        }
+    } else if (motor_mode == 1) {
+        motor_switch = 1;
+    } else if (motor_mode == 2) {
+        motor_switch = 1;
+    } else if(motor_mode == 3){
+        motor_switch = 0;  
+    }
+
+    motor_control(motor_switch);
+
 }
 
 
@@ -248,6 +271,10 @@ void motorControl(bool control) {
     }
 }
 
+void motor_control(int control) {
+    analogWrite(motor, pwm_value[control]);
+}
+
 
 bool trigger_DrillBitControlBool = false;
 
@@ -256,7 +283,7 @@ void sendTrigger_DrillBitControl() {
         sendOSCMsg("p");
         trigger_DrillBitControlBool = true;
 
-        motorControl(true);
+//        motorControl(true);
 
         return;
     }
@@ -264,7 +291,7 @@ void sendTrigger_DrillBitControl() {
         sendOSCMsg("pp");
         trigger_DrillBitControlBool = false;
 
-        motorControl(false);
+//        motorControl(false);
     }
 }
 
@@ -428,55 +455,58 @@ void Wifi_control() {
 }
 
 void process_received_osc(String msg) {
-    
+
     Serial.print("Receive OSC Message: ");
     Serial.println(msg);
 
-    if(msg == osc_msg[0]){
+    if (msg == osc_msg[0]) {
+        Serial.println("Set motor mode to 0.");
+        motor_mode = 0;
+    } else if (msg == osc_msg[1]) {
+        Serial.println("Set motor mode to 1.");
+        motor_mode = 1;
+    } else if (msg == osc_msg[2]) {
+        Serial.println("Set motor mode to 2.");
+        motor_mode = 2;
+    } else if (msg == osc_msg[3]) {
+        Serial.println("Set motor mode to 3.");
+        motor_mode = 3;
+    }
 
-        
-    }
-    else if(msg == osc_msg[1]){
-      
-    }
-    
 }
 
 void OSC_receive() {
 
-      int size = Udp.parsePacket();
+    int size = Udp.parsePacket();
 
-//  Serial.print("size: ");
-//  Serial.println(size);
-  String _string;
+    String _string;
+    int comma_pos = 0;
 
-  int comma_pos = 0;
-
-  if (size <= 0) 
-  return;
-    for(int i = 0; i < size; i ++) {
-      unsigned int tmp = Udp.read();
-      _string = String(_string + String(char(tmp)));
+    if (size <= 0)
+        return;
+    for (int i = 0; i < size; i++) {
+        unsigned int tmp = Udp.read();
+        _string = String(_string + String(char(tmp)));
     }
-    
-//    Serial.println(_string);
-    for(int i = 0; i < _string.length(); i ++){
-      if(_string.charAt(i) == ',')
-      {
-        comma_pos = i;
-        break;
-      }
+
+    for (int i = 0; i < _string.length(); i++) {
+        if (_string.charAt(i) == ',') {
+            comma_pos = i;
+            break;
+        }
     }
-    
-//    Serial.println(_string.charAt(comma_pos + 1));
+
     String msg = _string.substring(comma_pos + 2);
     process_received_osc(msg);
-  
+
 }
 
 
 void loop() {
 
+//    delay(100);
+//    Serial.println("In a loop.");
+    
     // Confirm WIFI connection
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("Reconnecting WIFI.");
@@ -491,9 +521,12 @@ void loop() {
 
 //  Receive OSC messages
     OSC_receive();
-    
+
 //  Use curl to change some internal parameters
-    Wifi_control();
+//    Wifi_control();
+
+    motor_thread.check();
 
 }
+
 
