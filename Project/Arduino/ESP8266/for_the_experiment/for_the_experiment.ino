@@ -418,6 +418,7 @@ void OSCControl() {
 
 }
 
+
 void Wifi_control() {
     // Build a webserver allowing parameter setting
     // Check if a client has connected
@@ -453,6 +454,7 @@ void Wifi_control() {
     // when the function returns and 'client' object is detroyed
     client.stop();
 }
+
 
 void process_received_osc(String msg) {
 
@@ -517,7 +519,7 @@ void loop() {
     }
 
 //  Control Moverio through OSC
-    OSCControl();
+//    OSCControl();
 
 //  Receive OSC messages
     OSC_receive();

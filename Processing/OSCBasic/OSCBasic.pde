@@ -111,15 +111,14 @@ void sendOSCMessage(String message) {
 
 void keyReleased() {
 
-    //sendOSCMessage(new String(new char[]{key, key}));
+    sendOSCMessage(new String(new char[]{key, key}));
 
 }
 
 
 void keyPressed() {
 
-    //sendOSCMessage(new String(new char[]{key}));
-    sendOSCMessage(new String("couple"));
+    sendOSCMessage(new String(new char[]{key}));
 
 }
 
@@ -145,11 +144,8 @@ void oscEvent(OscMessage theOscMessage) {
             println(theOscMessage.get(i).intValue());
         else if (typeTag.charAt(i) == 'f')
             println(theOscMessage.get(i).floatValue());
-
     }
-
     println();
-
 }
 
 
