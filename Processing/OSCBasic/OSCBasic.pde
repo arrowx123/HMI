@@ -14,15 +14,15 @@ NetAddress myRemoteLocation2;
 char currentKey = ' ';
 String addressPattern = "/to_unity";
 
-String targetIPAddress1 = "132.206.74.142";
-//String targetIPAddress1 = "127.0.0.1";
+//String targetIPAddress1 = "132.206.74.142";
+String targetIPAddress1 = "127.0.0.1";
 String targetIPAddress2 = "142.157.115.29";
 //String targetIPAddress2 = "192.168.43.137";
 
 
 //Default ports
-int listenPort = 9999;
-int sendPort = 8888;
+int listenPort = 8888;
+int sendPort = 9999;
 
 ArrayList recs;
 
@@ -134,7 +134,7 @@ void oscEvent(OscMessage theOscMessage) {
     println("typetag: " + typeTag);
 
     println("length: " + theOscMessage.arguments().length);
-    println("value: ");
+    print("value: ");
 
     for (int i = 0; i < theOscMessage.arguments().length; i++) {
 

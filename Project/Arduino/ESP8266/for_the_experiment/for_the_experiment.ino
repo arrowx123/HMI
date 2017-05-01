@@ -42,7 +42,7 @@ char OSCIP_char[20];
 char msgChar[100];
 
 String OSCIP = "132.206.74.142";
-char addressPattern[] = "/test";
+char addressPattern[] = "/to_unity";
 
 TimedAction motor_thread = TimedAction(250, set_erm);
 
@@ -517,7 +517,7 @@ void loop() {
     }
 
 //  Control Moverio through OSC
-//    OSCControl();
+    OSCControl();
 
 //  Receive OSC messages
     OSC_receive();
