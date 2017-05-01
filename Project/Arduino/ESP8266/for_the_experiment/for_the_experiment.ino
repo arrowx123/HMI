@@ -88,11 +88,9 @@ const IPAddress outIp(132, 206, 74, 142);       // remote IP of your computer
 //const unsigned int localPort = 8888;        // local port to listen for OSC packets (actually not used for sending)
 
 
-//motor_mode 0: with intervals
-//motor_mode 1: without intervals
 //motor_switch: select the pwm value
 int motor_switch = 0;
-int motor_mode = 0;
+int motor_mode = 3;
 
 void set_erm() {
 
