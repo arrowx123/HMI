@@ -5,7 +5,8 @@
   2.  /setOSCIP/          ???     /setOSCIP
   3.  /setOSCRemotePort/  ???     /setOSCRemotePort
   4.  /setOSCLocalPort/   ???     /setOSCLocalPort
-  5.  /showSetting
+  5.  /setOSCDelay/       ???     /setOSCDelay
+  6.  /showSetting
 
 MOVERIO IP: 132.206.74.162
 Mac     IP: 132.206.74.142
@@ -22,7 +23,12 @@ Arduino IP: 132.206.74.137
 
 
 //function definition
-void set_erm();
+void set_erm_0();
+void set_erm_1();
+void set_erm_2();
+void set_erm_3();
+void set_erm_4();
+
 void motor_control(int control);
 
 
@@ -33,9 +39,10 @@ char *pass = "sre_lab_mcgill";
 
 String requests[] = {"setLedValue", "setOSCIP",
                      "setOSCRemotePort", "setOSCLocalPort",
-                     "showSetting"};
+                     "setOSCDelay", "showSetting"};
 
-String osc_msg[] = {"couple", "rotate", "couple_rotate", "stop"};
+String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop"};
+int num_of_commands = 5;
 
 OSCErrorCode error;
 char OSCIP_char[20];
@@ -44,13 +51,14 @@ char msgChar[100];
 String OSCIP = "132.206.74.142";
 char addressPattern[] = "/to_unity";
 
-TimedAction motor_thread = TimedAction(250, set_erm);
+TimedAction motor_thread[] = {TimedAction(200, set_erm_0), TimedAction(200, set_erm_1), TimedAction(200, set_erm_2),
+                              TimedAction(200, set_erm_3), TimedAction(200, set_erm_4)};
 
 
 // Air Intensity Level 0 ~ 3
 int airIntensityLevelNum = 4;
 int airIntensity = -1;
-int pwmValue[] = {255, 511, 767, 1023};
+int pwmValue[] = {0, 255, 511, 767, 1023};
 int pwm_value[] = {0, 1023};
 
 // Rotation direction
@@ -90,28 +98,65 @@ const IPAddress outIp(132, 206, 74, 142);       // remote IP of your computer
 
 //motor_switch: select the pwm value
 int motor_switch = 0;
-int motor_mode = 3;
+int motor_mode = 4;
 
-void set_erm() {
+int osc_delay = 25;
 
-//    Serial.println("In the set_erm() funcion.");
+
+//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop"};
+void set_erm_0() {
+
+    static int interval = 0;
+
     if (motor_mode == 0) {
-        if (motor_switch == 0) {
-            motor_switch = 1;
-        } else {
-
-            motor_switch = 0;
+        if (interval == 0) {
+            motor_control(pwmValue[1]);
+            interval++;
+        } else if (interval == 1) {
+            interval++;
+            motor_control(pwmValue[0]);
+        } else if (interval == 2) {
+            interval++;
+            motor_control(pwmValue[0]);
+        } else if (interval == 3) {
+            interval++;
+            motor_control(pwmValue[0]);
+        } else if (interval == 4) {
+            motor_control(pwmValue[0]);
+            interval = 0;
         }
-    } else if (motor_mode == 1) {
-        motor_switch = 1;
-    } else if (motor_mode == 2) {
-        motor_switch = 1;
-    } else if(motor_mode == 3){
-        motor_switch = 0;  
     }
+}
 
-    motor_control(motor_switch);
+void set_erm_1() {
+    if (motor_mode == 1) {
+        motor_control(pwmValue[3]);
+    }
+}
 
+void set_erm_2() {
+    if (motor_mode == 2) {
+        motor_control(pwmValue[3]);
+    }
+}
+
+void set_erm_3() {
+    static int interval = 0;
+    if (motor_mode == 3) {
+        if (interval == 0) {
+            motor_control(pwmValue[4]);
+            interval++;
+        } else {
+            motor_control(pwmValue[0]);
+            interval = 0;
+        }
+    }
+}
+
+void set_erm_4() {
+    if (motor_mode == 4) {
+        motor_control(pwmValue[0]);
+    }
 }
 
 
@@ -269,8 +314,8 @@ void motorControl(bool control) {
     }
 }
 
-void motor_control(int control) {
-    analogWrite(motor, pwm_value[control]);
+void motor_control(int value) {
+    analogWrite(motor, value);
 }
 
 
@@ -389,6 +434,17 @@ String processRequest(WiFiClient &client) {
         Serial.println("New OSC local port is: " + OSCLocalPort);
         output = "Set OSC local port to" + OSCLocalPort_string;
     } else if (req.indexOf(requests[4]) != -1) {
+        String currentCommand = "setOSCDelay";
+
+        int firstPos = req.indexOf(currentCommand);
+        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+
+        String OSCDelay_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+        osc_delay = OSCDelay_string.toInt();
+
+        Serial.println("New OSC delay millisecond is: " + osc_delay);
+        output = "Set OSC delay millisecond to " + OSCDelay_string;
+    } else if (req.indexOf(requests[5]) != -1) {
 
         output = "The overall setting is:" + String("\n")
                  + "LedValue is: " + String(ledValue) + "\n"
@@ -471,7 +527,13 @@ void process_received_osc(String msg) {
     } else if (msg == osc_msg[3]) {
         Serial.println("Set motor mode to 3.");
         motor_mode = 3;
+    } else if (msg == osc_msg[4]) {
+        Serial.println("Set motor mode to 4.");
+        motor_mode = 4;
     }
+
+//    if(msg != osc_msg[3])
+//      delay(osc_delay);
 
 }
 
@@ -506,7 +568,7 @@ void loop() {
 
 //    delay(100);
 //    Serial.println("In a loop.");
-    
+
     // Confirm WIFI connection
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("Reconnecting WIFI.");
@@ -523,9 +585,10 @@ void loop() {
     OSC_receive();
 
 //  Use curl to change some internal parameters
-//    Wifi_control();
+    Wifi_control();
 
-    motor_thread.check();
+    for (int i = 0; i < num_of_commands; i++)
+        motor_thread[i].check();
 
 }
 

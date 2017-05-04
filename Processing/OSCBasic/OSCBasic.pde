@@ -14,8 +14,8 @@ NetAddress myRemoteLocation2;
 char currentKey = ' ';
 String addressPattern = "/to_unity";
 
-//String targetIPAddress1 = "132.206.74.142";
-String targetIPAddress1 = "127.0.0.1";
+String targetIPAddress1 = "132.206.74.137";
+//String targetIPAddress1 = "127.0.0.1";
 String targetIPAddress2 = "142.157.115.29";
 //String targetIPAddress2 = "192.168.43.137";
 
@@ -33,7 +33,7 @@ void create_rec() {
     recs.add(new Rec(80, 20, 50, 50));
     recs.add(new Rec(140, 20, 50, 50));
     recs.add( new Rec(200, 20, 50, 50) );
-    //recs.add( new Rec(80, 20, 50, 20) );
+    recs.add( new Rec(260, 20, 50, 50) );
     //recs.add( new Rec(20, 80, 20, 50) );
     //recs.add( new Rec(80, 50, 50, 20) );
     //recs.add( new Rec(50, 80, 20, 50) );
@@ -89,6 +89,8 @@ void mouseClicked() {
             } else if (i == 2) {
                 sendOSCMessage("couple_rotate");
             } else if (i == 3) {
+                sendOSCMessage("maximum_torque");
+            } else if (i == 4) {
                 sendOSCMessage("stop");
             }
         }
