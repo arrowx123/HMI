@@ -66,7 +66,7 @@ int rotationDirectionNum = 2;
 int rotationDirection = -1;
 
 // The arrangement of GPIOs in the righttop corner of NodeMCU
-const int trigger_drillBitControl = 4;      //yellow:   "p"         D2
+const int trigger_drillBitControl = 4;      //yellow:   " "         D2
 const int rotationDirectionControl = 5;     //white:    "q"         D1
 
 const int led = 16;      //drive internal led    D0
@@ -224,6 +224,8 @@ void setServer() {
     Serial.println("Server & UDP started");
     Serial.print("Local port: ");
     Serial.println(Udp.localPort());
+    Serial.print("Remote port: ");
+    Serial.println(OSCRemotePort);
     Serial.println();
 
     // Set OSC IP
@@ -323,7 +325,7 @@ bool trigger_DrillBitControlBool = false;
 
 void sendTrigger_DrillBitControl() {
     if (buttonPressed(trigger_drillBitControl)) {
-        sendOSCMsg("p");
+        sendOSCMsg(" ");
         trigger_DrillBitControlBool = true;
 
 //        motorControl(true);
@@ -331,7 +333,7 @@ void sendTrigger_DrillBitControl() {
         return;
     }
     if (trigger_DrillBitControlBool) {
-        sendOSCMsg("pp");
+        sendOSCMsg("  ");
         trigger_DrillBitControlBool = false;
 
 //        motorControl(false);

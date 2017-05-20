@@ -14,15 +14,18 @@ NetAddress myRemoteLocation2;
 char currentKey = ' ';
 String addressPattern = "/to_unity";
 
-String targetIPAddress1 = "132.206.74.137";
-//String targetIPAddress1 = "127.0.0.1";
+//mac
+//String targetIPAddress1 = "132.206.74.142";
+
+//moverio
+String targetIPAddress1 = "132.206.74.162";
 String targetIPAddress2 = "142.157.115.29";
 //String targetIPAddress2 = "192.168.43.137";
 
 
 //Default ports
-int listenPort = 8888;
-int sendPort = 9999;
+int listenPort = 1234;
+int sendPort = 8888;
 
 ArrayList recs;
 
@@ -101,7 +104,7 @@ void mouseClicked() {
 
 void sendOSCMessage(String message) {
 
-    OscMessage myMessage = new OscMessage("/led");
+    OscMessage myMessage = new OscMessage(addressPattern);
     myMessage.add(message); /* add an int to the osc message */
     oscP5.send(myMessage, myRemoteLocation1);
     oscP5.send(myMessage, myRemoteLocation2);
