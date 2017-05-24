@@ -48,7 +48,7 @@ OSCErrorCode error;
 char OSCIP_char[20];
 char msgChar[100];
 
-String OSCIP = "132.206.74.142";
+String OSCIP = "132.206.74.162";
 char addressPattern[] = "/to_unity";
 
 TimedAction motor_thread[] = {TimedAction(200, set_erm_0), TimedAction(200, set_erm_1), TimedAction(200, set_erm_2),
