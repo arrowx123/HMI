@@ -15,12 +15,15 @@ char currentKey = ' ';
 String addressPattern = "/to_unity";
 
 //mac
-//String targetIPAddress1 = "132.206.74.142";
+String targetIPAddress1 = "132.206.74.142";
 
 //moverio
-String targetIPAddress1 = "132.206.74.162";
-String targetIPAddress2 = "142.157.115.29";
-//String targetIPAddress2 = "192.168.43.137";
+//String targetIPAddress1 = "132.206.74.162";
+
+
+//String targetIPAddress2 = "142.157.115.29";
+//impact wrench
+String targetIPAddress2 = "192.168.43.137";
 
 
 //Default ports
