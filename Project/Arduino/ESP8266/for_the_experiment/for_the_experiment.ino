@@ -41,7 +41,7 @@ String requests[] = {"setLedValue", "setOSCIP",
                      "setOSCRemotePort", "setOSCLocalPort",
                      "setOSCDelay", "showSetting"};
 
-String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop"};
+String osc_msg[] = {"couple", "rotate", "collision_warning", "maximum_torque", "stop"};
 int num_of_commands = 5;
 
 OSCErrorCode error;
@@ -104,6 +104,8 @@ int osc_delay = 25;
 
 
 //{"couple", "rotate", "couple_rotate", "maximum_torque", "stop"};
+
+//couple
 void set_erm_0() {
 
     static int interval = 0;
@@ -128,23 +130,26 @@ void set_erm_0() {
     }
 }
 
+//rotate & couple_rotate
 void set_erm_1() {
     if (motor_mode == 1) {
-        motor_control(pwmValue[3]);
+        motor_control(pwmValue[2]);
     }
 }
 
+//collision_warning
 void set_erm_2() {
     if (motor_mode == 2) {
-        motor_control(pwmValue[3]);
+        motor_control(pwmValue[4]);
     }
 }
 
+//maximum_torque
 void set_erm_3() {
     static int interval = 0;
     if (motor_mode == 3) {
         if (interval == 0) {
-            motor_control(pwmValue[4]);
+            motor_control(pwmValue[3]);
             interval++;
         } else {
             motor_control(pwmValue[0]);
@@ -153,6 +158,7 @@ void set_erm_3() {
     }
 }
 
+//stop
 void set_erm_4() {
     if (motor_mode == 4) {
         motor_control(pwmValue[0]);
