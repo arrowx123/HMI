@@ -28,6 +28,7 @@ void set_erm_1();
 void set_erm_2();
 void set_erm_3();
 void set_erm_4();
+void set_erm_5();
 
 void motor_control(int control);
 
@@ -41,8 +42,9 @@ String requests[] = {"setLedValue", "setOSCIP",
                      "setOSCRemotePort", "setOSCLocalPort",
                      "setOSCDelay", "showSetting"};
 
-String osc_msg[] = {"couple", "rotate", "collision_warning", "maximum_torque", "stop"};
+String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
 int num_of_commands = 5;
+int last_mode;
 
 OSCErrorCode error;
 char OSCIP_char[20];
@@ -51,8 +53,8 @@ char msgChar[100];
 String OSCIP = "132.206.74.162";
 char addressPattern[] = "/to_unity";
 
-TimedAction motor_thread[] = {TimedAction(200, set_erm_0), TimedAction(200, set_erm_1), TimedAction(200, set_erm_2),
-                              TimedAction(200, set_erm_3), TimedAction(200, set_erm_4)};
+TimedAction motor_thread[] = {TimedAction(50, set_erm_0), TimedAction(50, set_erm_1), TimedAction(50, set_erm_2),
+                              TimedAction(50, set_erm_3), TimedAction(50, set_erm_4), TimedAction(50, set_erm_5)};
 
 
 // Air Intensity Level 0 ~ 3
@@ -103,62 +105,96 @@ int motor_mode = 4;
 int osc_delay = 25;
 
 
-//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop"};
-
-//couple
+//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
 void set_erm_0() {
 
     static int interval = 0;
 
     if (motor_mode == 0) {
-        if (interval == 0) {
-            motor_control(pwmValue[1]);
-            interval++;
-        } else if (interval == 1) {
-            interval++;
-            motor_control(pwmValue[0]);
-        } else if (interval == 2) {
-            interval++;
-            motor_control(pwmValue[0]);
-        } else if (interval == 3) {
-            interval++;
-            motor_control(pwmValue[0]);
-        } else if (interval == 4) {
-            motor_control(pwmValue[0]);
-            interval = 0;
+//        if (interval == 0) {
+//            motor_control(pwmValue[2]);
+//            interval++;
+//        } else if (interval == 1) {
+//            interval++;
+//            motor_control(pwmValue[0]);
+//        } else if (interval == 2) {
+//            interval++;
+//            motor_control(pwmValue[0]);
+//        } else if (interval == 3) {
+//            interval++;
+//            motor_control(pwmValue[0]);
+//        } else if (interval == 4) {
+//            motor_control(pwmValue[0]);
+//            interval = 0;
+//        }
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
+        {
+          motor_control(pwmValue[0]);
+          interval ++;
         }
+        else if(interval == 5 || interval == 6 || interval == 7){
+          motor_control(pwmValue[2]);
+          interval ++;
+        }
+        else if(interval == 8){
+          motor_mode = last_mode;
+          interval = 0;
+        }
+        
     }
 }
 
-//rotate & couple_rotate
+void set_erm_5() {
+
+    static int interval = 0;
+
+    if (motor_mode == 5) {
+        if(interval == 0)
+        {
+          motor_control(pwmValue[0]);
+          interval ++;
+        }
+        else if(interval == 1 || interval == 2){
+          motor_control(pwmValue[2]);
+          interval ++;
+        }
+        else if(interval == 3){
+          motor_mode = last_mode;
+          interval = 0;
+        }
+        
+    }
+}
+
 void set_erm_1() {
     if (motor_mode == 1) {
-        motor_control(pwmValue[2]);
+        motor_control(pwmValue[3]);
     }
 }
 
-//collision_warning
 void set_erm_2() {
     if (motor_mode == 2) {
-        motor_control(pwmValue[4]);
+        motor_control(pwmValue[3]);
     }
 }
 
-//maximum_torque
 void set_erm_3() {
     static int interval = 0;
     if (motor_mode == 3) {
-        if (interval == 0) {
-            motor_control(pwmValue[3]);
-            interval++;
-        } else {
+        if (interval == 1) {
             motor_control(pwmValue[0]);
+            interval++;
+        } 
+        else if(interval == 4){
+            motor_control(pwmValue[4]);
+        }
+        else if(interval == 6){
             interval = 0;
         }
+        interval ++;
     }
 }
 
-//stop
 void set_erm_4() {
     if (motor_mode == 4) {
         motor_control(pwmValue[0]);
@@ -303,7 +339,7 @@ void changeAirIntensity() {
 }
 
 void changeAirIntensity(int level) {
-    airIntensity = level;
+    airIntensity = level + 1;
 }
 
 void changeRotationDirection() {
@@ -342,7 +378,7 @@ void sendTrigger_DrillBitControl() {
         sendOSCMsg("  ");
         trigger_DrillBitControlBool = false;
 
-//        motorControl(false);
+        motorControl(false);
     }
 }
 
@@ -517,7 +553,6 @@ void Wifi_control() {
     client.stop();
 }
 
-
 void process_received_osc(String msg) {
 
     Serial.print("Receive OSC Message: ");
@@ -525,6 +560,7 @@ void process_received_osc(String msg) {
 
     if (msg == osc_msg[0]) {
         Serial.println("Set motor mode to 0.");
+        last_mode = motor_mode;
         motor_mode = 0;
     } else if (msg == osc_msg[1]) {
         Serial.println("Set motor mode to 1.");
@@ -538,6 +574,10 @@ void process_received_osc(String msg) {
     } else if (msg == osc_msg[4]) {
         Serial.println("Set motor mode to 4.");
         motor_mode = 4;
+    } else if (msg == osc_msg[5]) {
+        Serial.println("Set motor mode to 5.");
+        last_mode = motor_mode;
+        motor_mode = 5;
     }
 
 //    if(msg != osc_msg[3])
@@ -549,17 +589,26 @@ void OSC_receive() {
 
     int size = Udp.parsePacket();
 
-    String _string;
+    String _string = ".................................";
+    int string_length = 0;
+    
     int comma_pos = 0;
 
     if (size <= 0)
         return;
     for (int i = 0; i < size; i++) {
         unsigned int tmp = Udp.read();
+        
+//        _string[string_length] = char(tmp);
+//        string_length ++;
+        
         _string = String(_string + String(char(tmp)));
     }
 
+//    Serial.println(_string);
+
     for (int i = 0; i < _string.length(); i++) {
+//    for (int i = 0; i < string_length; i++) {
         if (_string.charAt(i) == ',') {
             comma_pos = i;
             break;
