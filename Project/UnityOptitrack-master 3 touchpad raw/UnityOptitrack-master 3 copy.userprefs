@@ -1,0 +1,16 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/OptiTrack.cs">
+    <Files>
+      <File FileName="Assets/Scripts/OptiTrack.cs" Line="52" Column="33" />
+      <File FileName="Assets/Scripts/ObjectController.cs" Line="51" Column="11" />
+      <File FileName="Assets/Scripts/DrillCombinationController.cs" Line="38" Column="68" />
+      <File FileName="Assets/Scripts/OutputSystem.cs" Line="28" Column="11" />
+      <File FileName="Assets/Scripts/GameController.cs" Line="175" Column="4" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

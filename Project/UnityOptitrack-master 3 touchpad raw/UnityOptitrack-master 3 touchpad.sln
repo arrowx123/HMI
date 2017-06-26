@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{0571A745-4C09-2C5D-15B1-9260FAEE01FD}") = "UnityOptitrack-master 3 touchpad", "Assembly-CSharp.csproj", "{B794C40F-A86A-DFCA-9307-8427D81205D3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B794C40F-A86A-DFCA-9307-8427D81205D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B794C40F-A86A-DFCA-9307-8427D81205D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B794C40F-A86A-DFCA-9307-8427D81205D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B794C40F-A86A-DFCA-9307-8427D81205D3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

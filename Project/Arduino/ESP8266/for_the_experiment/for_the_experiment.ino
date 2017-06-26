@@ -43,7 +43,7 @@ String requests[] = {"setLedValue", "setOSCIP",
                      "setOSCDelay", "showSetting"};
 
 String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
-int num_of_commands = 5;
+int num_of_commands = 6;
 int last_mode;
 
 OSCErrorCode error;
@@ -149,20 +149,19 @@ void set_erm_5() {
     static int interval = 0;
 
     if (motor_mode == 5) {
-        if(interval == 0)
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
         {
           motor_control(pwmValue[0]);
           interval ++;
         }
-        else if(interval == 1 || interval == 2){
+        else if(interval == 5 || interval == 6 || interval == 7){
           motor_control(pwmValue[2]);
           interval ++;
         }
-        else if(interval == 3){
+        else if(interval == 8){
           motor_mode = last_mode;
           interval = 0;
         }
-        
     }
 }
 

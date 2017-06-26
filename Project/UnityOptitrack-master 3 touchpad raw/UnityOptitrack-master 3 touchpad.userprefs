@@ -1,0 +1,18 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/GameController.cs">
+    <Files>
+      <File FileName="Assets/Scripts/CollisionControl/DetectCollision.cs" Line="379" Column="4" />
+      <File FileName="Assets/Scripts/OptiTrack.cs" Line="18" Column="38" />
+      <File FileName="Assets/Scripts/Utility/SoundManager.cs" Line="66" Column="25" />
+      <File FileName="Assets/Scripts/OSCControl/OscDataReceiver.cs" Line="115" Column="3" />
+      <File FileName="Assets/Scripts/GameController.cs" Line="757" Column="32" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/grey_mac/Desktop/mcgill/research/HMI/Project/UnityOptitrack-master 3 touchpad/Assets/MoverioController/Scripts/MoverioCameraController.cs" line="21" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
