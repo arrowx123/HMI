@@ -111,32 +111,16 @@ void set_erm_0() {
     static int interval = 0;
 
     if (motor_mode == 0) {
-//        if (interval == 0) {
-//            motor_control(pwmValue[2]);
-//            interval++;
-//        } else if (interval == 1) {
-//            interval++;
-//            motor_control(pwmValue[0]);
-//        } else if (interval == 2) {
-//            interval++;
-//            motor_control(pwmValue[0]);
-//        } else if (interval == 3) {
-//            interval++;
-//            motor_control(pwmValue[0]);
-//        } else if (interval == 4) {
-//            motor_control(pwmValue[0]);
-//            interval = 0;
-//        }
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4 || interval == 5 || interval == 6)
         {
           motor_control(pwmValue[0]);
           interval ++;
         }
-        else if(interval == 5 || interval == 6 || interval == 7){
+        else if(interval == 7 || interval == 8 || interval == 9){
           motor_control(pwmValue[2]);
           interval ++;
         }
-        else if(interval == 8){
+        else if(interval == 10){
           motor_mode = last_mode;
           interval = 0;
         }
@@ -149,16 +133,16 @@ void set_erm_5() {
     static int interval = 0;
 
     if (motor_mode == 5) {
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4 || interval == 5 || interval == 6)
         {
           motor_control(pwmValue[0]);
           interval ++;
         }
-        else if(interval == 5 || interval == 6 || interval == 7){
+        else if(interval == 7 || interval == 8 || interval == 9){
           motor_control(pwmValue[2]);
           interval ++;
         }
-        else if(interval == 8){
+        else if(interval == 10){
           motor_mode = last_mode;
           interval = 0;
         }
@@ -559,7 +543,8 @@ void process_received_osc(String msg) {
 
     if (msg == osc_msg[0]) {
         Serial.println("Set motor mode to 0.");
-        last_mode = motor_mode;
+        if (motor_mode != 0 && motor_mode != 5)
+          last_mode = motor_mode;
         motor_mode = 0;
     } else if (msg == osc_msg[1]) {
         Serial.println("Set motor mode to 1.");
@@ -575,7 +560,8 @@ void process_received_osc(String msg) {
         motor_mode = 4;
     } else if (msg == osc_msg[5]) {
         Serial.println("Set motor mode to 5.");
-        last_mode = motor_mode;
+        if (motor_mode != 0 && motor_mode != 5)
+          last_mode = motor_mode;
         motor_mode = 5;
     }
 
