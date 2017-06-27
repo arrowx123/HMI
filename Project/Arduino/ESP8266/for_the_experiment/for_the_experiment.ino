@@ -111,16 +111,16 @@ void set_erm_0() {
     static int interval = 0;
 
     if (motor_mode == 0) {
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4 || interval == 5 || interval == 6)
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
         {
           motor_control(pwmValue[0]);
           interval ++;
         }
-        else if(interval == 7 || interval == 8 || interval == 9){
-          motor_control(pwmValue[2]);
+        else if(interval == 5 || interval == 6 || interval == 7){
+          motor_control(pwmValue[1]);
           interval ++;
         }
-        else if(interval == 10){
+        else if(interval == 8){
           motor_mode = last_mode;
           interval = 0;
         }
@@ -133,16 +133,16 @@ void set_erm_5() {
     static int interval = 0;
 
     if (motor_mode == 5) {
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4 || interval == 5 || interval == 6)
+        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
         {
           motor_control(pwmValue[0]);
           interval ++;
         }
-        else if(interval == 7 || interval == 8 || interval == 9){
+        else if(interval == 5 || interval == 6){
           motor_control(pwmValue[2]);
           interval ++;
         }
-        else if(interval == 10){
+        else if(interval == 7){
           motor_mode = last_mode;
           interval = 0;
         }
