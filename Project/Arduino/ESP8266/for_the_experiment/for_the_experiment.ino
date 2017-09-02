@@ -124,7 +124,6 @@ void set_erm_0() {
           motor_mode = last_mode;
           interval = 0;
         }
-        
     }
 }
 
@@ -536,6 +535,7 @@ void Wifi_control() {
     client.stop();
 }
 
+//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
 void process_received_osc(String msg) {
 
     Serial.print("Receive OSC Message: ");
