@@ -34,7 +34,7 @@ void motor_control(int control);
 
 
 // The parameter of the wifi connection
-//const int size = 1010;
+// const int size = 1010;
 char *ssid = "srl-mini";
 char *pass = "sre_lab_mcgill";
 
@@ -50,7 +50,7 @@ OSCErrorCode error;
 char OSCIP_char[20];
 char msgChar[100];
 
-String OSCIP = "132.206.74.162";
+String OSCIP = "132.206.74.142";
 char addressPattern[] = "/to_unity";
 
 TimedAction motor_thread[] = {TimedAction(50, set_erm_0), TimedAction(50, set_erm_1), TimedAction(50, set_erm_2),
@@ -626,7 +626,8 @@ void loop() {
 //  Receive OSC messages
     OSC_receive();
 
-//  Use curl to change some internal parameters
+//  The webserver allowing parameter setting
+//  Use curl to change internal parameters
     Wifi_control();
 
     for (int i = 0; i < num_of_commands; i++)
