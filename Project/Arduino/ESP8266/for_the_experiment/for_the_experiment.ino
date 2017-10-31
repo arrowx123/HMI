@@ -23,191 +23,247 @@ Arduino IP: 132.206.74.137
 
 
 //function definition
-void set_erm_0();
-void set_erm_1();
-void set_erm_2();
-void set_erm_3();
-void set_erm_4();
-void set_erm_5();
-
-void motor_control(int control);
+void set_erms();
 
 
-// The parameter of the wifi connection
-// const int size = 1010;
+// The parameter of the wifi network
 char *ssid = "srl-mini";
 char *pass = "sre_lab_mcgill";
 
-String requests[] = {"setLedValue", "setOSCIP",
-                     "setOSCRemotePort", "setOSCLocalPort",
-                     "setOSCDelay", "showSetting"};
+// The list of commands for the http server
+//String requests[] = {"setLedValue", "setOSCIP", "setOSCRemotePort", "setOSCLocalPort", "setOSCDelay", "showSetting"};
 
-String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
-int num_of_commands = 6;
-int last_mode;
+//old
+//String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
+//new
+String osc_msg[] = {"stop", "couple", "rotate", "maximum_torque",
+                    "collide_up", "collide_down", "collide_left", "collide_right"};
+int osc_msg_num = 8;
 
-OSCErrorCode error;
 char OSCIP_char[20];
 char msgChar[100];
+String OSCIP = "132.206.74.142"; //mac
+//String OSCIP = "132.206.74.162"; //Moverio
 
-String OSCIP = "132.206.74.142";
+// OSC address pattern
 char addressPattern[] = "/to_unity";
 
-TimedAction motor_thread[] = {TimedAction(50, set_erm_0), TimedAction(50, set_erm_1), TimedAction(50, set_erm_2),
-                              TimedAction(50, set_erm_3), TimedAction(50, set_erm_4), TimedAction(50, set_erm_5)};
+
+//TimedAction motor_thread[] = {TimedAction(50, set_erm_0), TimedAction(50, set_erm_1), TimedAction(50, set_erm_2),
+//                              TimedAction(50, set_erm_3), TimedAction(50, set_erm_4), TimedAction(50, set_erm_5)};
+
+TimedAction motor_thread[] = {TimedAction(50, set_erms)};
+int num_of_motor_thread = 1;
 
 
-// Air Intensity Level 0 ~ 3
-int airIntensityLevelNum = 4;
-int airIntensity = -1;
-int pwmValue[] = {0, 255, 511, 767, 1023};
-int pwm_value[] = {0, 1023};
+int pwm_value[] = {0, 255, 511, 767, 1023};
 
-// Rotation direction
-int rotationDirectionNum = 2;
-int rotationDirection = -1;
 
 // The arrangement of GPIOs in the righttop corner of NodeMCU
-const int trigger_drillBitControl = 4;      //yellow:   " "         D2
-const int rotationDirectionControl = 5;     //white:    "q"         D1
+//const int trigger_drillBitControl = 4;      //yellow:   " "         D2
+const int trigger_drillBitControl = 16;
+//const int rotationDirectionControl = 5;     //white:    "q"         D1
 
-const int led = 16;      //drive internal led    D0
-const int motor = 10;    //drive motor           SD2
+//const int led = 16;      //drive internal led    D0
+//const int motor = 10;    //drive motor           SD2
 
+// up down left right
+const int erm_pin[] = {5, 4, 12, 14};
+const int erm_size = 4;
 
-// Air regulator
-const int airRegulator_0 = 0;    //D3
-const int airRegulator_1 = 2;    //D4
-const int airRegulator_2 = 14;   //D5
-const int airRegulator_3 = 12;   //D6
-
-int ledValue = 1;
-
-int OSCLocalPort = 9999;
-int OSCRemotePort = 8888;
-int serverListenPort = 80;
-
+const unsigned int OSCLocalPort = 9999; // local port to listen for OSC packets (actually not used for sending)
+const unsigned int OSCRemotePort = 8888; // remote port to receive OSC
+const unsigned int serverListenPort = 80;
 
 WiFiUDP Udp;                                  // A UDP instance to let us send and receive packets over UDP
-WiFiServer server(serverListenPort);          // Create an instance of the server specify the port to listen on
+//WiFiServer server(serverListenPort);          // Create an instance of the server specify the port to listen on
 
-const IPAddress outIp(132, 206, 74, 142);       // remote IP of your computer
-//const IPAddress outIp(10,40,10,105);        // remote IP of your computer
-
-//const unsigned int outPort = 9999;          // remote port to receive OSC
-//const unsigned int localPort = 8888;        // local port to listen for OSC packets (actually not used for sending)
-
-
-//motor_switch: select the pwm value
-int motor_switch = 0;
-int motor_mode = 4;
-
+int last_motor_mode;
+int motor_mode = 0;
 int osc_delay = 25;
 
+void motor_control(int pwm_idx, int erm_idx) {
+    analogWrite(erm_pin[erm_idx], pwm_value[pwm_idx]);
+}
 
-//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
-void set_erm_0() {
+void activate_all_erms(int pwm_idx) {
+    analogWrite(0, pwm_value[pwm_idx]);
+    analogWrite(1, pwm_value[pwm_idx]);
+    analogWrite(2, pwm_value[pwm_idx]);
+    analogWrite(3, pwm_value[pwm_idx]);
+}
+
+void set_erms() {
 
     static int interval = 0;
 
+//  stop
     if (motor_mode == 0) {
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
-        {
-          motor_control(pwmValue[0]);
-          interval ++;
-        }
-        else if(interval == 5 || interval == 6 || interval == 7){
-          motor_control(pwmValue[1]);
-          interval ++;
-        }
-        else if(interval == 8){
-          motor_mode = last_mode;
-          interval = 0;
-        }
+        activate_all_erms(0);
     }
-}
-
-void set_erm_5() {
-
-    static int interval = 0;
-
-    if (motor_mode == 5) {
-        if(interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4)
-        {
-          motor_control(pwmValue[0]);
-          interval ++;
-        }
-        else if(interval == 5 || interval == 6){
-          motor_control(pwmValue[2]);
-          interval ++;
-        }
-        else if(interval == 7){
-          motor_mode = last_mode;
-          interval = 0;
-        }
-    }
-}
-
-void set_erm_1() {
-    if (motor_mode == 1) {
-        motor_control(pwmValue[3]);
-    }
-}
-
-void set_erm_2() {
-    if (motor_mode == 2) {
-        motor_control(pwmValue[3]);
-    }
-}
-
-void set_erm_3() {
-    static int interval = 0;
-    if (motor_mode == 3) {
-        if (interval == 1) {
-            motor_control(pwmValue[0]);
+//  couple
+    else if (motor_mode == 1) {
+        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+            activate_all_erms(0);
             interval++;
-        } 
-        else if(interval == 4){
-            motor_control(pwmValue[4]);
-        }
-        else if(interval == 6){
+        } else if (interval == 5 || interval == 6 || interval == 7) {
+            activate_all_erms(1);
+            interval++;
+        } else if (interval == 8) {
+            motor_mode = last_motor_mode;
             interval = 0;
         }
-        interval ++;
+    }
+//  rotate
+    else if (motor_mode == 2) {
+        activate_all_erms(3);
+    }
+//  maximum_torque
+    else if (motor_mode == 3) {
+        if (interval == 1) {
+            activate_all_erms(0);
+            interval++;
+        } else if (interval == 4) {
+            activate_all_erms(4);
+        } else if (interval == 6) {
+            interval = 0;
+        }
+        interval++;
+    }
+//  collide_up
+    else if (motor_mode == 4) {
+        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+            motor_control(0, 0);
+            interval++;
+        } else if (interval == 5 || interval == 6) {
+            motor_control(2, 0);
+            interval++;
+        } else if (interval == 7) {
+            motor_mode = last_motor_mode;
+            interval = 0;
+        }
+    }
+//  collide_down
+    else if (motor_mode == 5) {
+        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+            motor_control(0, 1);
+            interval++;
+        } else if (interval == 5 || interval == 6) {
+            motor_control(2, 1);
+            interval++;
+        } else if (interval == 7) {
+            motor_mode = last_motor_mode;
+            interval = 0;
+        }
+    }
+//  collide_left
+    else if (motor_mode == 6) {
+        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+            motor_control(0, 2);
+            interval++;
+        } else if (interval == 5 || interval == 6) {
+            motor_control(2, 2);
+            interval++;
+        } else if (interval == 7) {
+            motor_mode = last_motor_mode;
+            interval = 0;
+        }
+    }
+//  collide_right
+    else if (motor_mode == 7) {
+        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+            motor_control(0, 3);
+            interval++;
+        } else if (interval == 5 || interval == 6) {
+            motor_control(2, 3);
+            interval++;
+        } else if (interval == 7) {
+            motor_mode = last_motor_mode;
+            interval = 0;
+        }
     }
 }
 
-void set_erm_4() {
-    if (motor_mode == 4) {
-        motor_control(pwmValue[0]);
-    }
-}
-
+//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
+//{"stop", "couple", "rotate", "maximum_torque","collide_up", "collide_down", "collide_left", "collide_right"};
+//void set_erm_0() {
+//
+//    static int interval = 0;
+//
+//    if (motor_mode == 0) {
+//        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+//            motor_control(pwmValue[0]);
+//            interval++;
+//        } else if (interval == 5 || interval == 6 || interval == 7) {
+//            motor_control(pwmValue[1]);
+//            interval++;
+//        } else if (interval == 8) {
+//            motor_mode = last_motor_mode;
+//            interval = 0;
+//        }
+//    }
+//}
+//
+//void set_erm_1() {
+//    if (motor_mode == 1) {
+//        motor_control(pwmValue[3]);
+//    }
+//}
+//
+//void set_erm_2() {
+//    if (motor_mode == 2) {
+//        motor_control(pwmValue[3]);
+//    }
+//}
+//
+//void set_erm_3() {
+//    static int interval = 0;
+//    if (motor_mode == 3) {
+//        if (interval == 1) {
+//            motor_control(pwmValue[0]);
+//            interval++;
+//        } else if (interval == 4) {
+//            motor_control(pwmValue[4]);
+//        } else if (interval == 6) {
+//            interval = 0;
+//        }
+//        interval++;
+//    }
+//}
+//
+//void set_erm_4() {
+//    if (motor_mode == 4) {
+//        motor_control(pwmValue[0]);
+//    }
+//}
+//
+//void set_erm_5() {
+//
+//    static int interval = 0;
+//
+//    if (motor_mode == 5) {
+//        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+//            motor_control(pwmValue[0]);
+//            interval++;
+//        } else if (interval == 5 || interval == 6) {
+//            motor_control(pwmValue[2]);
+//            interval++;
+//        } else if (interval == 7) {
+//            motor_mode = last_motor_mode;
+//            interval = 0;
+//        }
+//    }
+//}
 
 void setPin() {
-//  Pushbutton
     pinMode(trigger_drillBitControl, INPUT_PULLUP);
-    pinMode(rotationDirectionControl, INPUT_PULLUP);
-    Serial.println("setPin: set pushbuttons.");
+    Serial.println("setPin: set trigger.");
 
-//  Rotary Switch
-    pinMode(airRegulator_0, INPUT_PULLUP);
-    pinMode(airRegulator_1, INPUT_PULLUP);
-    pinMode(airRegulator_2, INPUT_PULLUP);
-    pinMode(airRegulator_3, INPUT_PULLUP);
-    Serial.println("setPin: set the rotary switch.");
-
-//  Output
-    pinMode(led, OUTPUT);
-    pinMode(motor, OUTPUT);
-    Serial.println("setPin: set outputs.");
-
-    // Turn off the led & motor
-    digitalWrite(led, ledValue);
-    Serial.println("setPin: set the led.");
-
-    digitalWrite(motor, LOW);
-    Serial.println("setPin: set the motor.");
+    for (int i = 0; i < erm_size; i++) {
+        pinMode(erm_pin[i], OUTPUT);
+    }
+    activate_all_erms(0);
+    Serial.println("setPin: set the ERM output pins.");
 }
 
 
@@ -238,24 +294,25 @@ void setSerial() {
 }
 
 
-void setServer() {
+//void setServer() {
+//
+//    // Start the server
+//    server.begin();
+//
+//    // Start UDP
+//    Udp.begin(OSCLocalPort);
+//    Serial.println("Server & UDP started");
+//    Serial.print("Local port: ");
+//    Serial.println(Udp.localPort());
+//    Serial.print("Remote port: ");
+//    Serial.println(OSCRemotePort);
+//    Serial.println();
+//
+//    // Set OSC IP
+//    OSCIP.toCharArray(OSCIP_char, OSCIP.length() + 1);
+//
+//}
 
-    // Start the server
-    server.begin();
-
-    // Start UDP
-    Udp.begin(OSCLocalPort);
-    Serial.println("Server & UDP started");
-    Serial.print("Local port: ");
-    Serial.println(Udp.localPort());
-    Serial.print("Remote port: ");
-    Serial.println(OSCRemotePort);
-    Serial.println();
-
-    // Set OSC IP
-    OSCIP.toCharArray(OSCIP_char, OSCIP.length() + 1);
-
-}
 
 void sendOSCMsg(String msgString) {
     Serial.println("msg sent: " + msgString + ".");
@@ -275,23 +332,12 @@ void sendOSCMsg(String msgString) {
     msg.send(Udp);
     Udp.endPacket();
     msg.empty();
-    delay(100);
-}
 
-void turnOnLed() {
-    ledValue = 0;
-    digitalWrite(led, ledValue);
-}
-
-
-void turnOffLed() {
-    ledValue = 1;
-    digitalWrite(led, ledValue);
+//    delay(25);
 }
 
 
 void setup() {
-    turnOffLed();
 
     setSerial();
     Serial.println("setSerial finished.\n");
@@ -302,49 +348,34 @@ void setup() {
     setWIFI();
     Serial.println("setWIFI finished.\n");
 
-    setServer();
-    Serial.println("setServer finished.\n");
+//    setServer();
+//    Serial.println("setServer finished.\n");
 
-    turnOnLed();
 }
 
 
 bool buttonPressed(int buttonIndex) {
+
     if (!digitalRead(buttonIndex))
         return true;
     else
         return false;
 }
 
-void changeAirIntensity() {
-    airIntensity = (airIntensity + 1) % airIntensityLevelNum;
-}
-
-void changeAirIntensity(int level) {
-    airIntensity = level + 1;
-}
-
-void changeRotationDirection() {
-    rotationDirection = (rotationDirection + 1) % rotationDirectionNum;
-}
-
-void changeRotationDirection(int level) {
-    rotationDirection = level;
-}
-
-void motorControl(bool control) {
-    if (control) {
-        analogWrite(motor, pwmValue[airIntensity]);
-    } else {
-        analogWrite(motor, 0);
-    }
-}
-
-void motor_control(int value) {
-    analogWrite(motor, value);
-}
+//void motorControl(bool control) {
+//    if (control) {
+//        analogWrite(motor, pwmValue[airIntensity]);
+//    } else {
+//        analogWrite(motor, 0);
+//    }
+//}
 
 
+
+/*
+ * if trigger is pressed,
+ * send an OSC message to Moverio / Mac
+ */
 bool trigger_DrillBitControlBool = false;
 
 void sendTrigger_DrillBitControl() {
@@ -360,240 +391,183 @@ void sendTrigger_DrillBitControl() {
         sendOSCMsg("  ");
         trigger_DrillBitControlBool = false;
 
-        motorControl(false);
+//        motorControl(false);
     }
+    return;
 }
 
 
-// Control rotation trigger
-int lastRotationDirection = -1;
-
-void sendrotationDirectionControl() {
-    if (buttonPressed(rotationDirectionControl)) {
-        changeRotationDirection(0);
-    } else {
-        changeRotationDirection(1);
-    }
-    if (lastRotationDirection != rotationDirection) {
-        lastRotationDirection = rotationDirection;
-        sendOSCMsg("r" + String(rotationDirection));
-        Serial.printf("The current rotationDirection is: %d.\n", rotationDirection);
-    }
-}
-
-// Control air intensity
-int lastAirIntensity = -1;
-
-void sendAirRegulatorControl() {
-//  Serial.printf("Checking airIntensity.\n");
-    if (buttonPressed(airRegulator_0)) {
-        changeAirIntensity(0);
-    } else if (buttonPressed(airRegulator_1)) {
-        changeAirIntensity(1);
-    } else if (buttonPressed(airRegulator_2)) {
-        changeAirIntensity(2);
-    } else if (buttonPressed(airRegulator_3)) {
-        changeAirIntensity(3);
-    }
-
-    if (lastAirIntensity != airIntensity) {
-        lastAirIntensity = airIntensity;
-        Serial.printf("The current airIntensity is: %d.\n", airIntensity);
-        sendOSCMsg("a" + String(airIntensity));
-    }
-}
-
-String processRequest(WiFiClient &client) {
-
-    String req = client.readStringUntil('\r');
-    String output = "";
-    Serial.println("\n");
-    Serial.println("req: " + req);
-    client.flush();
-
-    // Match the request
-    if (req.indexOf(requests[0]) != -1) {
-        String currentCommand = "setLedValue";
-
-        int firstPos = req.indexOf(currentCommand);
-        int secondPos = req.indexOf(currentCommand, firstPos + 1);
-
-        String ledValue_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
-        ledValue = ledValue_string.toInt();
-
-
-        // Set ledValue according to the request
-        digitalWrite(led, ledValue);
-
-        Serial.println("ledValue is: " + ledValue_string);
-        output = "Set ledValue = " + ledValue_string;
-    } else if (req.indexOf(requests[1]) != -1) {
-        String currentCommand = "setOSCIP";
-
-        int firstPos = req.indexOf(currentCommand);
-        int secondPos = req.indexOf(currentCommand, firstPos + 1);
-
-        OSCIP = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
-
-        Serial.println("New OSC IP is: " + OSCIP);
-        output = "Set OSC IP to " + OSCIP;
-    } else if (req.indexOf(requests[2]) != -1) {
-        String currentCommand = "setOSCRemotePort";
-
-        int firstPos = req.indexOf(currentCommand);
-        int secondPos = req.indexOf(currentCommand, firstPos + 1);
-
-        String OSCRemotePort_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
-        OSCRemotePort = OSCRemotePort_string.toInt();
-
-        Serial.println("New OSC remote port is: " + OSCRemotePort);
-        output = "Set OSC remote port to " + OSCRemotePort_string;
-    } else if (req.indexOf(requests[3]) != -1) {
-        String currentCommand = "setOSCLocalPort";
-
-        int firstPos = req.indexOf(currentCommand);
-        int secondPos = req.indexOf(currentCommand, firstPos + 1);
-
-        String OSCLocalPort_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
-        OSCLocalPort = OSCLocalPort_string.toInt();
-
-        Serial.println("New OSC local port is: " + OSCLocalPort);
-        output = "Set OSC local port to" + OSCLocalPort_string;
-    } else if (req.indexOf(requests[4]) != -1) {
-        String currentCommand = "setOSCDelay";
-
-        int firstPos = req.indexOf(currentCommand);
-        int secondPos = req.indexOf(currentCommand, firstPos + 1);
-
-        String OSCDelay_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
-        osc_delay = OSCDelay_string.toInt();
-
-        Serial.println("New OSC delay millisecond is: " + osc_delay);
-        output = "Set OSC delay millisecond to " + OSCDelay_string;
-    } else if (req.indexOf(requests[5]) != -1) {
-
-        output = "The overall setting is:" + String("\n")
-                 + "LedValue is: " + String(ledValue) + "\n"
-                 + "OSCIP is: " + String(OSCIP) + "\n"
-                 + "OSCRemotePort is: " + String(OSCRemotePort) + "\n"
-                 + "OSCLocalPort is: " + String(OSCLocalPort) + "\n";
-
-    } else {
-//    Serial.println("invalid request");
-
-//    return;
-    }
+//String processRequest(WiFiClient &client) {
+//
+//    String req = client.readStringUntil('\r');
+//    String output = "";
+//    Serial.println("\n");
+//    Serial.println("req: " + req);
+//    client.flush();
+//
+//    // Match the request
+//    if (req.indexOf(requests[0]) != -1) {
+//        String currentCommand = "setLedValue";
+//
+//        int firstPos = req.indexOf(currentCommand);
+//        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+//
+//        String ledValue_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+//        ledValue = ledValue_string.toInt();
+//
+//
+//        // Set ledValue according to the request
+//        digitalWrite(led, ledValue);
+//
+//        Serial.println("ledValue is: " + ledValue_string);
+//        output = "Set ledValue = " + ledValue_string;
+//    } else if (req.indexOf(requests[1]) != -1) {
+//        String currentCommand = "setOSCIP";
+//
+//        int firstPos = req.indexOf(currentCommand);
+//        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+//
+//        OSCIP = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+//
+//        Serial.println("New OSC IP is: " + OSCIP);
+//        output = "Set OSC IP to " + OSCIP;
+//    } else if (req.indexOf(requests[2]) != -1) {
+//        String currentCommand = "setOSCRemotePort";
+//
+//        int firstPos = req.indexOf(currentCommand);
+//        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+//
+//        String OSCRemotePort_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+//        OSCRemotePort = OSCRemotePort_string.toInt();
+//
+//        Serial.println("New OSC remote port is: " + OSCRemotePort);
+//        output = "Set OSC remote port to " + OSCRemotePort_string;
+//    } else if (req.indexOf(requests[3]) != -1) {
+//        String currentCommand = "setOSCLocalPort";
+//
+//        int firstPos = req.indexOf(currentCommand);
+//        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+//
+//        String OSCLocalPort_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+//        OSCLocalPort = OSCLocalPort_string.toInt();
+//
+//        Serial.println("New OSC local port is: " + OSCLocalPort);
+//        output = "Set OSC local port to" + OSCLocalPort_string;
+//    } else if (req.indexOf(requests[4]) != -1) {
+//        String currentCommand = "setOSCDelay";
+//
+//        int firstPos = req.indexOf(currentCommand);
+//        int secondPos = req.indexOf(currentCommand, firstPos + 1);
+//
+//        String OSCDelay_string = req.substring(firstPos + currentCommand.length() + 1, secondPos - 1);
+//        osc_delay = OSCDelay_string.toInt();
+//
+//        Serial.println("New OSC delay millisecond is: " + osc_delay);
+//        output = "Set OSC delay millisecond to " + OSCDelay_string;
+//    } else if (req.indexOf(requests[5]) != -1) {
+//
+//        output = "The overall setting is:" + String("\n")
+//                 + "LedValue is: " + String(ledValue) + "\n"
+//                 + "OSCIP is: " + String(OSCIP) + "\n"
+//                 + "OSCRemotePort is: " + String(OSCRemotePort) + "\n"
+//                 + "OSCLocalPort is: " + String(OSCLocalPort) + "\n";
+//
+//    } else {
+////    Serial.println("invalid request");
+////    return;
+//    }
+//    return output;
+//}
 
 
-    return output;
+void OSC_send() {
 
-}
+/*
+ * obsolete for updated harware
+ */
+//    sendAirRegulatorControl();
+//    sendrotationDirectionControl();
 
-
-void OSCControl() {
-
-    sendAirRegulatorControl();
-    sendrotationDirectionControl();
     sendTrigger_DrillBitControl();
 
 }
 
-
-void Wifi_control() {
-    // Build a webserver allowing parameter setting
-    // Check if a client has connected
-    WiFiClient client = server.available();
-    if (!client) {
-        return;
-    }
-
-    // Wait until the client sends some data
-    Serial.println("new client");
-//  while(!client.available()){
+// Build a webserver allowing parameter setting
+//void Wifi_control() {
+//    // Check if a client has connected
+//    WiFiClient client = server.available();
+//    if (!client) {
+//        return;
+//    }
+//
+//    // Wait until the client sends some data
+//    Serial.println("new client");
+////  while(!client.available()){
+////    delay(1);
+////  }
+//
+//    // Process the request of the client
+//    String output = processRequest(client);
+//
+//
+//    client.flush();
+//
+//    // Prepare the response
+////  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
+////  s += (val)?"high":"low";
+////  s += "</html>\n";
+//
+//    // Send the response to the client
+////  client.print(s);
+//    client.println(output);
 //    delay(1);
-//  }
+//    Serial.println("Client disonnected");
+//
+//    // The client will actually be disconnected
+//    // when the function returns and 'client' object is detroyed
+//    client.stop();
+//}
 
-    // Process the request of the client
-    String output = processRequest(client);
-
-
-    client.flush();
-
-    // Prepare the response
-//  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
-//  s += (val)?"high":"low";
-//  s += "</html>\n";
-
-    // Send the response to the client
-//  client.print(s);
-    client.println(output);
-    delay(1);
-    Serial.println("Client disonnected");
-
-    // The client will actually be disconnected
-    // when the function returns and 'client' object is detroyed
-    client.stop();
-}
 
 //{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
+//{"stop", "couple", "rotate", "maximum_torque", "collide_up", "collide_down", "collide_left", "collide_right"};
+
 void process_received_osc(String msg) {
 
     Serial.print("Receive OSC Message: ");
     Serial.println(msg);
 
-    if (msg == osc_msg[0]) {
-        Serial.println("Set motor mode to 0.");
-        if (motor_mode != 0 && motor_mode != 5)
-          last_mode = motor_mode;
-        motor_mode = 0;
-    } else if (msg == osc_msg[1]) {
-        Serial.println("Set motor mode to 1.");
-        motor_mode = 1;
-    } else if (msg == osc_msg[2]) {
-        Serial.println("Set motor mode to 2.");
-        motor_mode = 2;
-    } else if (msg == osc_msg[3]) {
-        Serial.println("Set motor mode to 3.");
-        motor_mode = 3;
-    } else if (msg == osc_msg[4]) {
-        Serial.println("Set motor mode to 4.");
-        motor_mode = 4;
-    } else if (msg == osc_msg[5]) {
-        Serial.println("Set motor mode to 5.");
-        if (motor_mode != 0 && motor_mode != 5)
-          last_mode = motor_mode;
-        motor_mode = 5;
+    for (int i = 0; i < osc_msg_num; i++) {
+        if (msg == osc_msg[i]) {
+            motor_mode = i;
+            break;
+        }
     }
 
-//    if(msg != osc_msg[3])
-//      delay(osc_delay);
+    if (motor_mode != 0 && motor_mode != 5)
+        last_motor_mode = motor_mode;
 
+    Serial.print("Set motor mode to ");
+    Serial.println(motor_mode);
 }
 
+// receive OSC messages and decode them
 void OSC_receive() {
 
     int size = Udp.parsePacket();
-
     String _string = ".................................";
     int string_length = 0;
-    
     int comma_pos = 0;
 
     if (size <= 0)
         return;
+
     for (int i = 0; i < size; i++) {
         unsigned int tmp = Udp.read();
-        
-//        _string[string_length] = char(tmp);
-//        string_length ++;
-        
         _string = String(_string + String(char(tmp)));
     }
 
-//    Serial.println(_string);
-
     for (int i = 0; i < _string.length(); i++) {
-//    for (int i = 0; i < string_length; i++) {
         if (_string.charAt(i) == ',') {
             comma_pos = i;
             break;
@@ -608,9 +582,6 @@ void OSC_receive() {
 
 void loop() {
 
-//    delay(100);
-//    Serial.println("In a loop.");
-
     // Confirm WIFI connection
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("Reconnecting WIFI.");
@@ -620,19 +591,20 @@ void loop() {
         Serial.print(".");
     }
 
-//  Control Moverio through OSC
-    OSCControl();
+//  Control Moverio through sending OSC messages
+    OSC_send();
 
 //  Receive OSC messages
     OSC_receive();
 
-//  The webserver allowing parameter setting
-//  Use curl to change internal parameters
-    Wifi_control();
+    /*
+     * The webserver allowing parameter setting
+     * Use curl to change internal parameters
+     */
+//    Wifi_control();
 
-    for (int i = 0; i < num_of_commands; i++)
+    for (int i = 0; i < num_of_motor_thread; i++)
         motor_thread[i].check();
 
 }
-
 
