@@ -39,6 +39,8 @@ char *pass = "sre_lab_mcgill";
 String osc_msg[] = {"stop", "couple", "rotate", "maximum_torque",
                     "collide_up", "collide_down", "collide_left", "collide_right"};
 int osc_msg_num = 8;
+int direction_collide_parameter[] = {5, 8};
+
 
 char OSCIP_char[20];
 char msgChar[100];
@@ -78,7 +80,7 @@ const unsigned int serverListenPort = 80;
 WiFiUDP Udp;                                  // A UDP instance to let us send and receive packets over UDP
 //WiFiServer server(serverListenPort);          // Create an instance of the server specify the port to listen on
 
-int last_motor_mode;
+int last_motor_mode = 0;
 int motor_mode = 0;
 int osc_delay = 25;
 
@@ -87,13 +89,16 @@ void motor_control(int pwm_idx, int erm_idx) {
 }
 
 void activate_all_erms(int pwm_idx) {
-    analogWrite(0, pwm_value[pwm_idx]);
-    analogWrite(1, pwm_value[pwm_idx]);
-    analogWrite(2, pwm_value[pwm_idx]);
-    analogWrite(3, pwm_value[pwm_idx]);
+    analogWrite(erm_pin[0], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[1], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[2], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[3], pwm_value[pwm_idx]);
 }
 
 void set_erms() {
+
+//    Serial.print("motor_mode: ");
+//    Serial.println(motor_mode);
 
     static int interval = 0;
 
@@ -107,7 +112,7 @@ void set_erms() {
             activate_all_erms(0);
             interval++;
         } else if (interval == 5 || interval == 6 || interval == 7) {
-            activate_all_erms(1);
+            activate_all_erms(3);
             interval++;
         } else if (interval == 8) {
             motor_mode = last_motor_mode;
@@ -124,7 +129,7 @@ void set_erms() {
             activate_all_erms(0);
             interval++;
         } else if (interval == 4) {
-            activate_all_erms(4);
+            activate_all_erms(3);
         } else if (interval == 6) {
             interval = 0;
         }
@@ -132,52 +137,52 @@ void set_erms() {
     }
 //  collide_up
     else if (motor_mode == 4) {
-        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+        if (interval < direction_collide_parameter[0]) {
             motor_control(0, 0);
             interval++;
-        } else if (interval == 5 || interval == 6) {
-            motor_control(2, 0);
+        } else if (interval < direction_collide_parameter[1]) {
+            motor_control(4, 0);
             interval++;
-        } else if (interval == 7) {
+        } else {
             motor_mode = last_motor_mode;
             interval = 0;
         }
     }
 //  collide_down
     else if (motor_mode == 5) {
-        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+        if (interval < direction_collide_parameter[0]) {
             motor_control(0, 1);
             interval++;
-        } else if (interval == 5 || interval == 6) {
-            motor_control(2, 1);
+        } else if (interval < direction_collide_parameter[1]) {
+            motor_control(4, 1);
             interval++;
-        } else if (interval == 7) {
+        } else {
             motor_mode = last_motor_mode;
             interval = 0;
         }
     }
 //  collide_left
     else if (motor_mode == 6) {
-        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+        if (interval < direction_collide_parameter[0]) {
             motor_control(0, 2);
             interval++;
-        } else if (interval == 5 || interval == 6) {
-            motor_control(2, 2);
+        } else if (interval < direction_collide_parameter[1]) {
+            motor_control(4, 2);
             interval++;
-        } else if (interval == 7) {
+        } else {
             motor_mode = last_motor_mode;
             interval = 0;
         }
     }
 //  collide_right
     else if (motor_mode == 7) {
-        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+        if (interval < direction_collide_parameter[0]) {
             motor_control(0, 3);
             interval++;
-        } else if (interval == 5 || interval == 6) {
-            motor_control(2, 3);
+        } else if (interval < direction_collide_parameter[1]) {
+            motor_control(4, 3);
             interval++;
-        } else if (interval == 7) {
+        } else {
             motor_mode = last_motor_mode;
             interval = 0;
         }
@@ -298,20 +303,22 @@ void setSerial() {
 //
 //    // Start the server
 //    server.begin();
-//
-//    // Start UDP
-//    Udp.begin(OSCLocalPort);
-//    Serial.println("Server & UDP started");
-//    Serial.print("Local port: ");
-//    Serial.println(Udp.localPort());
-//    Serial.print("Remote port: ");
-//    Serial.println(OSCRemotePort);
-//    Serial.println();
-//
-//    // Set OSC IP
-//    OSCIP.toCharArray(OSCIP_char, OSCIP.length() + 1);
-//
 //}
+
+void setUDP() {
+    // Start UDP
+    Udp.begin(OSCLocalPort);
+    Serial.println("Server & UDP started");
+    Serial.print("Local port: ");
+    Serial.println(Udp.localPort());
+    Serial.print("Remote port: ");
+    Serial.println(OSCRemotePort);
+    Serial.println();
+
+    // Set OSC IP
+    OSCIP.toCharArray(OSCIP_char, OSCIP.length() + 1);
+
+}
 
 
 void sendOSCMsg(String msgString) {
@@ -347,6 +354,9 @@ void setup() {
 
     setWIFI();
     Serial.println("setWIFI finished.\n");
+
+    setUDP();
+    Serial.println("setUDP finished.\n");
 
 //    setServer();
 //    Serial.println("setServer finished.\n");
@@ -537,15 +547,15 @@ void process_received_osc(String msg) {
     Serial.print("Receive OSC Message: ");
     Serial.println(msg);
 
+    if (motor_mode != 1 && motor_mode != 4 && motor_mode != 5 && motor_mode != 6 && motor_mode != 7)
+        last_motor_mode = motor_mode;
+
     for (int i = 0; i < osc_msg_num; i++) {
         if (msg == osc_msg[i]) {
             motor_mode = i;
             break;
         }
     }
-
-    if (motor_mode != 0 && motor_mode != 5)
-        last_motor_mode = motor_mode;
 
     Serial.print("Set motor mode to ");
     Serial.println(motor_mode);
