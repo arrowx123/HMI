@@ -95,6 +95,28 @@ void activate_all_erms(int pwm_idx) {
     analogWrite(erm_pin[3], pwm_value[pwm_idx]);
 }
 
+void activate_up_erms(int pwm_idx) {
+    analogWrite(erm_pin[0], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[3], pwm_value[pwm_idx]);
+}
+
+void activate_down_erms(int pwm_idx) {
+    analogWrite(erm_pin[1], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[2], pwm_value[pwm_idx]);
+}
+
+void activate_left_erms(int pwm_idx) {
+    analogWrite(erm_pin[0], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[2], pwm_value[pwm_idx]);
+}
+
+void activate_right_erms(int pwm_idx) {
+    analogWrite(erm_pin[1], pwm_value[pwm_idx]);
+    analogWrite(erm_pin[3], pwm_value[pwm_idx]);
+}
+
+
+
 void set_erms() {
 
 //    Serial.print("motor_mode: ");
@@ -138,10 +160,10 @@ void set_erms() {
 //  collide_up
     else if (motor_mode == 4) {
         if (interval < direction_collide_parameter[0]) {
-            motor_control(0, 0);
+            activate_up_erms(0);
             interval++;
         } else if (interval < direction_collide_parameter[1]) {
-            motor_control(4, 0);
+            activate_up_erms(4);
             interval++;
         } else {
             motor_mode = last_motor_mode;
@@ -151,10 +173,10 @@ void set_erms() {
 //  collide_down
     else if (motor_mode == 5) {
         if (interval < direction_collide_parameter[0]) {
-            motor_control(0, 1);
+            activate_down_erms(0);
             interval++;
         } else if (interval < direction_collide_parameter[1]) {
-            motor_control(4, 1);
+            activate_down_erms(4);
             interval++;
         } else {
             motor_mode = last_motor_mode;
@@ -164,10 +186,10 @@ void set_erms() {
 //  collide_left
     else if (motor_mode == 6) {
         if (interval < direction_collide_parameter[0]) {
-            motor_control(0, 2);
+            activate_left_erms(0);
             interval++;
         } else if (interval < direction_collide_parameter[1]) {
-            motor_control(4, 2);
+            activate_left_erms(4);
             interval++;
         } else {
             motor_mode = last_motor_mode;
@@ -177,10 +199,10 @@ void set_erms() {
 //  collide_right
     else if (motor_mode == 7) {
         if (interval < direction_collide_parameter[0]) {
-            motor_control(0, 3);
+            activate_right_erms(0);
             interval++;
         } else if (interval < direction_collide_parameter[1]) {
-            motor_control(4, 3);
+            activate_right_erms(4);
             interval++;
         } else {
             motor_mode = last_motor_mode;
@@ -390,7 +412,7 @@ bool trigger_DrillBitControlBool = false;
 
 void sendTrigger_DrillBitControl() {
     if (buttonPressed(trigger_drillBitControl)) {
-        sendOSCMsg(" ");
+        sendOSCMsg("start_vibration");
         trigger_DrillBitControlBool = true;
 
 //        motorControl(true);
@@ -398,7 +420,7 @@ void sendTrigger_DrillBitControl() {
         return;
     }
     if (trigger_DrillBitControlBool) {
-        sendOSCMsg("  ");
+        sendOSCMsg("stop_vibration");
         trigger_DrillBitControlBool = false;
 
 //        motorControl(false);
@@ -491,12 +513,6 @@ void sendTrigger_DrillBitControl() {
 
 
 void OSC_send() {
-
-/*
- * obsolete for updated harware
- */
-//    sendAirRegulatorControl();
-//    sendrotationDirectionControl();
 
     sendTrigger_DrillBitControl();
 
