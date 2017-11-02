@@ -37,8 +37,8 @@ char *pass = "sre_lab_mcgill";
 //String osc_msg[] = {"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
 //new
 String osc_msg[] = {"stop", "couple", "rotate", "maximum_torque",
-                    "collide_up", "collide_down", "collide_left", "collide_right"};
-int osc_msg_num = 8;
+                    "collide_up", "collide_down", "collide_left", "collide_right", "collide"};
+int osc_msg_num = 9;
 int direction_collide_parameter[] = {5, 8};
 
 
@@ -114,7 +114,6 @@ void activate_right_erms(int pwm_idx) {
     analogWrite(erm_pin[1], pwm_value[pwm_idx]);
     analogWrite(erm_pin[3], pwm_value[pwm_idx]);
 }
-
 
 
 void set_erms() {
@@ -203,6 +202,19 @@ void set_erms() {
             interval++;
         } else if (interval < direction_collide_parameter[1]) {
             activate_right_erms(4);
+            interval++;
+        } else {
+            motor_mode = last_motor_mode;
+            interval = 0;
+        }
+    }
+//  collide
+    else if (motor_mode == 8) {
+        if (interval < direction_collide_parameter[0]) {
+            activate_all_erms(0);
+            interval++;
+        } else if (interval < direction_collide_parameter[1]) {
+            activate_all_erms(3);
             interval++;
         } else {
             motor_mode = last_motor_mode;
@@ -560,10 +572,10 @@ void OSC_send() {
 
 void process_received_osc(String msg) {
 
-//    Serial.print("Receive OSC Message: ");
-//    Serial.println(msg);
+    Serial.print("Receive OSC Message: ");
+    Serial.println(msg);
 
-    if (motor_mode != 1 && motor_mode != 4 && motor_mode != 5 && motor_mode != 6 && motor_mode != 7)
+    if (motor_mode != 1 && motor_mode != 4 && motor_mode != 5 && motor_mode != 6 && motor_mode != 7 && motor_mode != 8)
         last_motor_mode = motor_mode;
 
     for (int i = 0; i < osc_msg_num; i++) {

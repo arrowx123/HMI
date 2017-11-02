@@ -587,7 +587,22 @@ public class GameController : MonoBehaviour
 		if (hapticFeedback) {
 			OSCDataSenderController.send_rotate_message ();
 		}
-		Debug.Log ("startVibration!");
+//		Debug.Log ("startVibration!");
+		//		print (Time.time);
+	}
+
+	IEnumerator stopVibration ()
+	{
+		//		print (Time.time);
+		//		OutputSystemController.set_completion_current_sign (true);
+
+		//		yield return new WaitForSeconds (0.35f);
+		yield return new WaitForSeconds (0.5f);
+
+		if (hapticFeedback) {
+			OSCDataSenderController.send_stop_message ();
+		}
+		//		Debug.Log ("startVibration!");
 		//		print (Time.time);
 	}
 
@@ -789,7 +804,7 @@ public class GameController : MonoBehaviour
 				if (output_warning == false) {
 					if (hapticFeedback) {
 						StartCoroutine (start_vibration_coroutine);
-						Debug.Log ("first startcoroutine startVibration!");
+//						Debug.Log ("first startcoroutine startVibration!");
 
 						soundManagerController.play_vibration ();
 
@@ -800,7 +815,7 @@ public class GameController : MonoBehaviour
 					if (hapticFeedback) {
 //						OSCDataSenderController.send_maximum_torque_message ();
 						StopCoroutine (start_vibration_coroutine);
-						Debug.Log ("first stopcoroutine startVibration!");
+//						Debug.Log ("first stopcoroutine startVibration!");
 
 						soundManagerController.stop_vibration ();
 						soundManagerController.play_torque ();
@@ -810,8 +825,6 @@ public class GameController : MonoBehaviour
 					}
 				}
 
-
-
 			} else {
 				flangeNut_Rotation [subtask_order [subtask_index]].setRotationSpeed (0);
 				FlangeNut_simplePositionMovement [subtask_order [subtask_index]].moveAgainstZ (0);
@@ -819,7 +832,7 @@ public class GameController : MonoBehaviour
 				if (wrenchFittingController.isCollided () == false) {
 					if (hapticFeedback) {
 						StartCoroutine (start_vibration_coroutine);
-						Debug.Log ("second startcoroutine startVibration!");
+//						Debug.Log ("second startcoroutine startVibration!");
 
 						soundManagerController.play_vibration ();
 					} else {
@@ -828,7 +841,7 @@ public class GameController : MonoBehaviour
 				} else if (wrenchFittingController.isCollided () == true) {
 					if (hapticFeedback) {
 						StopCoroutine (start_vibration_coroutine);
-						Debug.Log ("second stopcoroutine startVibration!");
+//						Debug.Log ("second stopcoroutine startVibration!");
 
 						OSCDataSenderController.send_stop_message ();
 						soundManagerController.stop_torque ();
@@ -847,18 +860,25 @@ public class GameController : MonoBehaviour
 			flangeNut_Rotation [subtask_order [subtask_index]].setRotationSpeed (0);
 			FlangeNut_simplePositionMovement [subtask_order [subtask_index]].moveAgainstZ (0);
 			if (wrenchFittingController.isCoupled (subtask_order [subtask_index])) {
-				
-				soundManagerController.play_couple ();
 
 				if (!coupleFeedbackSend) {
 					if (hapticFeedback) {
 						OSCDataSenderController.send_couple_message ();
 					}
+
+					soundManagerController.play_couple ();
 					coupleFeedbackSend = true;
+					Debug.Log ("here1");
+				} else {
+					StartCoroutine (stopVibration ());
+//					OSCDataSenderController.send_stop_message ();
+					soundManagerController.stop_torque ();
+					Debug.Log ("here2");
 				}
 					
 
 			} else {
+				Debug.Log ("here3");
 				coupleFeedbackSend = false;
 			
 				soundManagerController.stop_couple ();
