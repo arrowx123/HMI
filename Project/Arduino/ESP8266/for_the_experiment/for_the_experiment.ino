@@ -346,6 +346,7 @@ void setUDP() {
 void sendOSCMsg(String msgString) {
     Serial.println("msg sent: " + msgString + ".");
 
+    delay(10);
     // Send OSC message
     OSCMessage msg(addressPattern);
 
@@ -362,7 +363,6 @@ void sendOSCMsg(String msgString) {
     Udp.endPacket();
     msg.empty();
 
-//    delay(25);
 }
 
 
@@ -560,8 +560,8 @@ void OSC_send() {
 
 void process_received_osc(String msg) {
 
-    Serial.print("Receive OSC Message: ");
-    Serial.println(msg);
+//    Serial.print("Receive OSC Message: ");
+//    Serial.println(msg);
 
     if (motor_mode != 1 && motor_mode != 4 && motor_mode != 5 && motor_mode != 6 && motor_mode != 7)
         last_motor_mode = motor_mode;
@@ -573,8 +573,8 @@ void process_received_osc(String msg) {
         }
     }
 
-    Serial.print("Set motor mode to ");
-    Serial.println(motor_mode);
+//    Serial.print("Set motor mode to ");
+//    Serial.println(motor_mode);
 }
 
 // receive OSC messages and decode them
