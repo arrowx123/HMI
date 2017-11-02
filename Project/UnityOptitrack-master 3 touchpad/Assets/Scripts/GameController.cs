@@ -365,7 +365,6 @@ public class GameController : MonoBehaviour
 	}
 
 
-
 	// Update is called once per frame
 	void Update ()
 	{
@@ -385,18 +384,15 @@ public class GameController : MonoBehaviour
 		if (!allowControl)
 			return;
 
-
 		setDrillCombinationSimplePositionMovement ();
 
 		setTrigger ();
 
-		setRotationTrigger ();
-
 		setDrillBitRotation (drillBitRotation_direction);
 
-		setDrillCombinationControllerPlacementAroundACircle ();
-
-		setAirRegulartor ();
+//		setRotationTrigger ();
+//		setDrillCombinationControllerPlacementAroundACircle ();
+//		setAirRegulartor ();
 	}
 
 
@@ -582,7 +578,7 @@ public class GameController : MonoBehaviour
 		//		OutputSystemController.set_completion_current_sign (true);
 
 		//		yield return new WaitForSeconds (0.35f);
-				yield return new WaitForSeconds (0.0f);
+		yield return new WaitForSeconds (0.0f);
 
 		if (hapticFeedback) {
 			OSCDataSenderController.send_rotate_message ();
@@ -595,9 +591,10 @@ public class GameController : MonoBehaviour
 	{
 		//		print (Time.time);
 		//		OutputSystemController.set_completion_current_sign (true);
-
 		//		yield return new WaitForSeconds (0.35f);
-		yield return new WaitForSeconds (0.5f);
+
+//		yield return new WaitForSeconds (0.5f);
+		yield return new WaitForSeconds (0.0f);
 
 		if (hapticFeedback) {
 			OSCDataSenderController.send_stop_message ();
@@ -605,6 +602,10 @@ public class GameController : MonoBehaviour
 		//		Debug.Log ("startVibration!");
 		//		print (Time.time);
 	}
+
+	//	public void stop_stop_vibration_coroutine(){
+	//			StopCoroutine (stop_vibration_coroutine);
+	//	}
 
 	IEnumerator disableCompletionSign ()
 	{
@@ -655,8 +656,8 @@ public class GameController : MonoBehaviour
 //
 //		}
 
-
-
+		IEnumerator start_vibration_coroutine = startVibration ();
+		IEnumerator stop_vibration_coroutine = stopVibration ();
 
 		bool output_warning = false;
 		bool finish_current_task = true;
@@ -671,8 +672,7 @@ public class GameController : MonoBehaviour
 
 		if (FlangeNutStateController [subtask_order [subtask_index]].toTheMaximumPos ()
 		    && wrenchFittingController.isCoupled (subtask_order [subtask_index])
-/*		    && drillBitSpeed != 0)) {) {*/
-		){
+/*		    && drillBitSpeed != 0)) {) {*/) {
 			
 			output_warning = true;
 		}
@@ -688,7 +688,6 @@ public class GameController : MonoBehaviour
 //			OutputSystemController.set_maximum_torque_warning (output_warning);
 			max_torque_display = true;
 		}
-
 
 //		Debug.Log ("output_warning: " + output_warning);
 //		Debug.Log ("max_torque_display: " + max_torque_display);
@@ -788,19 +787,17 @@ public class GameController : MonoBehaviour
 			return;
 		
 		}
-			
 
-		IEnumerator start_vibration_coroutine = startVibration ();
 		if (drillBitSpeed != 0) {
 			
 			if (wrenchFittingController.isCoupled (subtask_order [subtask_index])) {
+
+				OSCDataSenderController.send_test_point ("test_point_4");
 
 				flangeNut_Rotation [subtask_order [subtask_index]].setRotationSpeed (drillBitSpeed / 100);
 				FlangeNut_simplePositionMovement [subtask_order [subtask_index]].moveAgainstZ (flangeMovementSpeed);
 
 //				Debug.Log ("flangeNut_Rotation in " + subtask_index);
-
-
 				if (output_warning == false) {
 					if (hapticFeedback) {
 						StartCoroutine (start_vibration_coroutine);
@@ -826,6 +823,8 @@ public class GameController : MonoBehaviour
 				}
 
 			} else {
+
+				OSCDataSenderController.send_test_point ("test_point_5");
 				flangeNut_Rotation [subtask_order [subtask_index]].setRotationSpeed (0);
 				FlangeNut_simplePositionMovement [subtask_order [subtask_index]].moveAgainstZ (0);
 
@@ -851,16 +850,15 @@ public class GameController : MonoBehaviour
 						soundManagerController.stop_vibration ();
 					}
 				}
-					
-				//				Debug.Log ("send_rotate_message\n");
 			}
 
 		} else {
-
+			
 			flangeNut_Rotation [subtask_order [subtask_index]].setRotationSpeed (0);
 			FlangeNut_simplePositionMovement [subtask_order [subtask_index]].moveAgainstZ (0);
 			if (wrenchFittingController.isCoupled (subtask_order [subtask_index])) {
 
+				OSCDataSenderController.send_test_point ("test_point_1");
 				if (!coupleFeedbackSend) {
 					if (hapticFeedback) {
 						OSCDataSenderController.send_couple_message ();
@@ -868,31 +866,30 @@ public class GameController : MonoBehaviour
 
 					soundManagerController.play_couple ();
 					coupleFeedbackSend = true;
-					Debug.Log ("here1");
 				} else {
-					StartCoroutine (stopVibration ());
 //					OSCDataSenderController.send_stop_message ();
+					if (max_torque_display)
+						StartCoroutine (stop_vibration_coroutine);
 					soundManagerController.stop_torque ();
-					Debug.Log ("here2");
 				}
 					
-
 			} else {
-				Debug.Log ("here3");
 				coupleFeedbackSend = false;
 			
 				soundManagerController.stop_couple ();
 
 				if (wrenchFittingController.isCollided () == true) {
-//					OSCDataSenderController.send_collision_warning_message ();
 
+					StopCoroutine (stop_vibration_coroutine);
+					OSCDataSenderController.send_test_point ("test_point_2");
+
+//					OSCDataSenderController.send_collision_warning_message ();
 //					if (finish_current_task_vibration_control) {
 //						if (hapticFeedback) {
 //							OSCDataSenderController.send_stop_message ();
 //						}
 //						finish_current_task_vibration_control = false;
 //					}
-
 //					Debug.Log ("I am here!!");
 //					if (hapticFeedback) {
 //						OSCDataSenderController.send_stop_message ();
@@ -903,6 +900,7 @@ public class GameController : MonoBehaviour
 
 				} else if (wrenchFittingController.isCollided () == false) {
 
+					OSCDataSenderController.send_test_point ("test_point_3");
 					if (hapticFeedback) {
 						StopCoroutine (start_vibration_coroutine);
 						OSCDataSenderController.send_stop_message ();
@@ -941,6 +939,41 @@ public class GameController : MonoBehaviour
 		}
 	}
 
+
+	public void send_collide_up_vibration ()
+	{
+		if (hapticFeedback) {
+			OSCDataSenderController.send_collision_up_message ();
+			Debug.Log ("send_collide_up_vibration");
+		}
+	}
+
+
+	public void send_collide_down_vibration ()
+	{
+		if (hapticFeedback) {
+			OSCDataSenderController.send_collision_down_message ();
+			Debug.Log ("send_collide_down_vibration");
+		}
+	}
+
+
+	public void send_collide_left_vibration ()
+	{
+		if (hapticFeedback) {
+			OSCDataSenderController.send_collision_left_message ();
+			Debug.Log ("send_collide_left_vibration");
+		}
+	}
+
+
+	public void send_collide_right_vibration ()
+	{
+		if (hapticFeedback) {
+			OSCDataSenderController.send_collision_right_message ();
+			Debug.Log ("send_collide_right_vibration");
+		}
+	}
 
 
 	bool currentPlacementAroundACircleControl = false;
