@@ -124,6 +124,18 @@ public class OptiTrack : MonoBehaviour
 		return roundNum;
 	}
 
+	public Vector3 get_handle_position(){
+
+		return handle.transform.position;
+
+	}
+
+	public Vector3 get_handle_angle(){
+
+		return handle.transform.rotation.eulerAngles;
+
+	}
+
 
 	void Awake ()
 	{
@@ -173,7 +185,7 @@ public class OptiTrack : MonoBehaviour
 	void Update ()
 	{
 
-		Debug.Log ("OptiTrack Update function.");
+//		Debug.Log ("OptiTrack Update function.");
 
 
 /** Update the handle position and rotation **/
@@ -203,9 +215,13 @@ public class OptiTrack : MonoBehaviour
 
 //		GameController.getCurrentNutPosition ();
 
+
+		Debug.Log ("handle: " + handle.transform.rotation);
+		Debug.Log ("handle: " + handle.transform.position);
+
 		if (!receivePositionData) {
-			handle.transform.position = diff_handle;
-			handle.transform.rotation = Quaternion.Euler (euler_handle);
+//			handle.transform.position = diff_handle;
+//			handle.transform.rotation = Quaternion.Euler (euler_handle);
 			return;
 		}
 
@@ -213,9 +229,9 @@ public class OptiTrack : MonoBehaviour
 		Vector3 diff = handleCurrentPos - handleLastPos;
 		float error = Math.Abs (diff.x) + Math.Abs (diff.y) + Math.Abs (diff.z);
 
-		Debug.Log ("diff_handle: " + diff_handle);
-		Debug.Log ("diff: " + diff);
-		Debug.Log ("error: " + error);
+//		Debug.Log ("diff_handle: " + diff_handle);
+//		Debug.Log ("diff: " + diff);
+//		Debug.Log ("error: " + error);
 
 
 		int subtask_index = GameController.get_subtask_index ();

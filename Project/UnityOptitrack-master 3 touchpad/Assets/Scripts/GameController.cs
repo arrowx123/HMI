@@ -71,6 +71,7 @@ public class GameController : MonoBehaviour
 
 	private PlacementAroundACircle drillCombinationController_placementAroundACircle;
 	private SimplePositionMovement drillCombinationController_simplePositionMovement;
+	private SimplePositionMovement handleController_simplePositionMovement;
 
 	private OscDataReceiver OSCDataReceiverController;
 	private OscDataSender OSCDataSenderController;
@@ -167,23 +168,33 @@ public class GameController : MonoBehaviour
 
 
 		time_record [2 * (round_index - 1)] = System.DateTime.Now;
-		Debug.Log (System.DateTime.Now);
+//		Debug.Log (System.DateTime.Now);
 
 
 		Debug.Log ("round_index: " + round_index);
 
 		OscDataReceiver.Instance.setChangeSmoothPos (changeSmoothPos);
 
-		GameObject drillCombinationObject = GameObject.FindWithTag ("DrillCombination");
-		if (drillCombinationObject != null) {
-			drillCombinationController_placementAroundACircle = drillCombinationObject.GetComponent<PlacementAroundACircle> ();
-			drillCombinationController_placementAroundACircle.setRadius (radius);
+//		GameObject drillCombinationObject = GameObject.FindWithTag ("DrillCombination");
+//		if (drillCombinationObject != null) {
+//			drillCombinationController_placementAroundACircle = drillCombinationObject.GetComponent<PlacementAroundACircle> ();
+//			drillCombinationController_placementAroundACircle.setRadius (radius);
+//
+//			drillCombinationController_simplePositionMovement = drillCombinationObject.GetComponent<SimplePositionMovement> ();
+//			drillCombinationController_simplePositionMovement.setReference (localReference);
+//		} else {
+//			if (openOutput) {
+//				Debug.Log ("GameController: can not find drillCombinationController_circle");
+//			}
+//		}
 
-			drillCombinationController_simplePositionMovement = drillCombinationObject.GetComponent<SimplePositionMovement> ();
-			drillCombinationController_simplePositionMovement.setReference (localReference);
+		GameObject handleObject = GameObject.FindWithTag ("Handle");
+		if (handleObject != null) {
+			handleController_simplePositionMovement = handleObject.GetComponent<SimplePositionMovement> ();
+			handleController_simplePositionMovement.setReference (localReference);
 		} else {
 			if (openOutput) {
-				Debug.Log ("GameController: can not find drillCombinationController_circle");
+				Debug.Log ("GameController: can not find handleController_simplePositionMovement");
 			}
 		}
 
@@ -313,8 +324,9 @@ public class GameController : MonoBehaviour
 		GameObject GameControllerObject = GameObject.FindWithTag ("GameController");
 		if (GameControllerObject != null) {
 			OutputSystemController = GameControllerObject.GetComponent<OutputSystem> ();
+			Debug.Log ("GameController: Set OutputSystem!");
 		} else {
-			Debug.Log ("GameController: Can not find GameController!");
+			Debug.Log ("GameController: Can not find OutputSystem!");
 		}
 
 
@@ -384,7 +396,7 @@ public class GameController : MonoBehaviour
 		if (!allowControl)
 			return;
 
-		setDrillCombinationSimplePositionMovement ();
+		setHandleSimplePositionMovement ();
 
 		setTrigger ();
 
@@ -998,9 +1010,7 @@ public class GameController : MonoBehaviour
 			lastPlacementAroundACircleControl = false;
 		}
 	}
-
-
-
+		
 	//	private void setDrillCombinationControllerPlacementAroundACircle ()
 	//	{
 	//
@@ -1010,11 +1020,10 @@ public class GameController : MonoBehaviour
 	//
 	//	}
 
-
 	Vector3 movement = new Vector3 (0, 0, 0);
 	Vector3 rotation = new Vector3 (0, 0, 0);
 
-	private void setDrillCombinationSimplePositionMovement ()
+	private void setHandleSimplePositionMovement ()
 	{
 		if (!OSCControl) {
 			if (Input.GetKey (KeyCode.Q))
@@ -1058,8 +1067,8 @@ public class GameController : MonoBehaviour
 		}
 
 
-		drillCombinationController_simplePositionMovement.setMovePosition (movement * movementSpeed);
-		drillCombinationController_simplePositionMovement.setMoveRotation (rotation * rotationSpeed);
+		handleController_simplePositionMovement.setMovePosition (movement * movementSpeed);
+		handleController_simplePositionMovement.setMoveRotation (rotation * rotationSpeed);
 
 		movement = new Vector3 (0, 0, 0);
 		rotation = new Vector3 (0, 0, 0);

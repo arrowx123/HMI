@@ -31,13 +31,13 @@ public class PlacementAroundACircle : MonoBehaviour {
 		rbs = GetComponentsInChildren<Rigidbody> ();
 		numOfComponents = rbs.Length;
 
-		Debug.Log ("PlacementAroundACircle: ");
-		Debug.Log(numOfComponents);
+//		Debug.Log ("PlacementAroundACircle: ");
+//		Debug.Log(numOfComponents);
 
 		startPositions = new Vector3[numOfComponents];
 		endPositions = new Vector3[numOfComponents];
 	
-		Debug.Log ("start radius: " + radius);
+//		Debug.Log ("start radius: " + radius);
 
 	}
 

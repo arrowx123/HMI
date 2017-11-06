@@ -63,7 +63,7 @@ public class TwoPointsMovement : MonoBehaviour {
 		scaleVector = transform.localScale;
 		scale = 1 / scaleVector.x;
 
-		Debug.Log ("start movementSpeed: " + movementSpeed);
+//		Debug.Log ("start movementSpeed: " + movementSpeed);
 
 		if (rb == null) {
 			Debug.Log ("TwoPointsMovement: Can not find the rigid body!");
