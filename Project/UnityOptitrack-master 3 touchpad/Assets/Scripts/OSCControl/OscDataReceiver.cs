@@ -8,10 +8,8 @@ public class OscDataReceiver : ReceiveOscBehaviourBase
 
 	//	public parameters
 	//	public Vector3 Offset = new Vector3(4f, 0, 0);
-
-
-
 	// control parameters
+
 	private int airRegulatorControl = 3;
 	private bool rotationTriggerControl;
 	private bool drillBitControl;
@@ -91,10 +89,6 @@ public class OscDataReceiver : ReceiveOscBehaviourBase
 		return rotateZ;
 	}
 
-
-
-
-
 	protected override void ReceiveMessage (OscMessage message)
 	{
 		
@@ -112,11 +106,12 @@ public class OscDataReceiver : ReceiveOscBehaviourBase
 //			}
 
 			string currentString = message [i].ToString ();
-//			Debug.Log ("Receive string: " + currentString);
 
-			if (currentString.Equals (" ")) {
+			if (currentString.Equals ("start_vibration")) {
+				Debug.Log ("Receive string: " + currentString);
 				triggerControl = true;
-			} else if (currentString.Equals ("  ")) {
+
+			} else if (currentString.Equals ("stop_vibration")) {
 				triggerControl = false;
 			}
 
@@ -126,9 +121,9 @@ public class OscDataReceiver : ReceiveOscBehaviourBase
 				rotationTriggerControl = false;
 			}
 
-			if (currentString.Equals (" ")) {
+			if (currentString.Equals ("start_vibration")) {
 				drillBitControl = true;
-			} else if (currentString.Equals ("  ")) {
+			} else if (currentString.Equals ("stop_vibration")) {
 				drillBitControl = false;
 			}
 

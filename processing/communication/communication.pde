@@ -180,11 +180,12 @@ void keyPressed() {
          String.valueOf(angle_a) + ";" + String.valueOf(angle_b) + ";" + String.valueOf(angle_c) + ";";
   
   boolean OutsideWorkspace = true;
-  boolean RobotReady = false;
+  boolean RobotReady = true;
   msg += String.valueOf(OutsideWorkspace) + ";" + String.valueOf(RobotReady);
   
   println("msg: " + msg);
   
+  port_to_send_UDP = 5000;
   udp_sender.send(msg, ip_to_send_UDP, port_to_send_UDP);
 
 }
