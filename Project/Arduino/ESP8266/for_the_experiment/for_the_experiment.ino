@@ -44,8 +44,8 @@ int direction_collide_parameter[] = {5, 8};
 
 char OSCIP_char[20];
 char msgChar[100];
-String OSCIP = "132.206.74.142"; //mac
-//String OSCIP = "132.206.74.162"; //Moverio
+//String OSCIP = "132.206.74.142"; //mac
+String OSCIP = "132.206.74.162"; //Moverio
 
 // OSC address pattern
 char addressPattern[] = "/to_unity";
@@ -82,7 +82,6 @@ WiFiUDP Udp;                                  // A UDP instance to let us send a
 
 int last_motor_mode = 0;
 int motor_mode = 0;
-int osc_delay = 25;
 
 void motor_control(int pwm_idx, int erm_idx) {
     analogWrite(erm_pin[erm_idx], pwm_value[pwm_idx]);

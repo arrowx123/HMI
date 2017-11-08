@@ -15,7 +15,8 @@ public class OscDataSender : SendOscBehaviourBase
 		"collide_up",
 		"collide_down",
 		"collide_left",
-		"collide_right"
+		"collide_right",
+		"collide"
 	};
 		
 
@@ -62,10 +63,27 @@ public class OscDataSender : SendOscBehaviourBase
 
 	public void send_collision_message ()
 	{
+		send_osc_msg (requests [8]);
+	}
+
+	public void send_collision_up_message ()
+	{
 		send_osc_msg (requests [4]);
-//		send_osc_msg (requests [5]);
-//		send_osc_msg (requests [6]);
-//		send_osc_msg (requests [7]);
+	}
+
+	public void send_collision_down_message ()
+	{
+		send_osc_msg (requests [5]);
+	}
+
+	public void send_collision_left_message ()
+	{
+		send_osc_msg (requests [6]);
+	}
+
+	public void send_collision_right_message ()
+	{
+		send_osc_msg (requests [7]);
 	}
 
 	public void  send_maximum_torque_message ()
@@ -81,6 +99,11 @@ public class OscDataSender : SendOscBehaviourBase
 	public void send_osc_msg (string msg)
 	{
 		Send (new Rug.Osc.OscMessage (OscAddress, msg));
-		Debug.Log ("Send OSC msg:" + msg);
+//		Debug.Log ("Send OSC msg:" + msg);
+	}
+
+	public void send_test_point (string msg)
+	{
+		Send (new Rug.Osc.OscMessage (OscAddress, msg));
 	}
 }

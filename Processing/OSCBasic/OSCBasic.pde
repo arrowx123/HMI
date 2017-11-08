@@ -1,3 +1,5 @@
+import hypermedia.net.*;
+
 //MOVERIO IP: 132.206.74.162
 //Mac     IP: 132.206.74.142
 //Arduino IP: 132.206.74.137
@@ -6,6 +8,7 @@ import netP5.*;
 import oscP5.*;
 import oscP5.*;
 import netP5.*;
+
 
 OscP5 oscP5;
 NetAddress myRemoteLocation1;
@@ -18,22 +21,23 @@ String addressPattern = "/to_unity";
 //String targetIPAddress1 = "132.206.74.142";
 
 //moverio
-String targetIPAddress1 = "132.206.74.162";
-
-//nexus 5
-//String targetIPAddress1 = "132.206.74.188";
-
-
-//String targetIPAddress2 = "142.157.115.29";
+String targetIPAddress1 = "132.206.74.142";
 //impact wrench
-String targetIPAddress2 = "192.168.43.137";
+String targetIPAddress2 = "132.206.74.137";
 
 
 //Default ports
-int listenPort = 1234;
-int sendPort = 8888;
+int localPort = 9999;
+int remotePort = 9998;
 
 ArrayList recs;
+String osc_msg[] = {"stop", "couple", "rotate", "maximum_torque",
+                    "collide_up", "collide_down", "collide_left", "collide_right"};
+
+String ip_to_send_UDP = "127.0.0.1";
+int port_to_send_UDP = 9997;
+UDP udp;
+UDP udp_sender;
 
 void create_rec() {
 
@@ -43,10 +47,19 @@ void create_rec() {
     recs.add(new Rec(140, 20, 50, 50));
     recs.add( new Rec(200, 20, 50, 50) );
     recs.add( new Rec(260, 20, 50, 50) );
-    //recs.add( new Rec(20, 80, 20, 50) );
-    //recs.add( new Rec(80, 50, 50, 20) );
-    //recs.add( new Rec(50, 80, 20, 50) );
-    //recs.add( new Rec(80, 80, 50, 50) );
+    recs.add( new Rec(20, 80, 50, 50) );
+    recs.add( new Rec(80, 80, 50, 50) );
+    recs.add( new Rec(140, 80, 50, 50) );
+
+}
+
+void UDP_setup(){
+  
+  udp = new UDP( this, 9997 );
+  //udp.log( true );     // <-- printout the connection activity
+  udp.listen( true );
+  
+  udp_sender = new UDP( this, 9996 );
 
 }
 
@@ -57,7 +70,7 @@ void setup() {
     create_rec();
 
     /* start oscP5, listening for incoming messages at port 12000 */
-    oscP5 = new OscP5(this, listenPort);
+    oscP5 = new OscP5(this, localPort);
 
     /* myRemoteLocation is a NetAddress. a NetAddress takes 2 parameters,
      * an ip address and a port number. myRemoteLocation is used as parameter in
@@ -66,9 +79,36 @@ void setup() {
      * and the port of the remote location address are the same, hence you will
      * send messages back to this sketch.
      */
-    myRemoteLocation1 = new NetAddress(targetIPAddress1, sendPort);
-    myRemoteLocation2 = new NetAddress(targetIPAddress2, sendPort);
+    myRemoteLocation1 = new NetAddress(targetIPAddress1, remotePort);
+    myRemoteLocation2 = new NetAddress(targetIPAddress2, remotePort);
+    
+    UDP_setup();
 }
+
+void send_UDP(String msg){
+  
+    String ip       = "localhost";  // the remote IP address
+    int port        = 6100;    // the destination port
+    
+    // formats the message for Pd
+    msg = msg+";\n";
+    // send the message
+    udp.send( msg, ip, port );
+  
+}
+
+void receive( byte[] data, String ip, int port ) {  // <-- extended handler
+  
+  
+  // get the "real" message =
+  // forget the ";\n" at the end <-- !!! only for a communication with Pd !!!
+  //data = subset(data, 0, data.length-2);
+  String message = new String( data );
+  
+  // print the result
+  println( "UDP receive: \""+message+"\" from "+ip+" on port "+port );
+}
+
 
 
 void draw() {
@@ -91,17 +131,7 @@ void mouseClicked() {
     for (int i = recs.size() - 1; i >= 0; i--) {
         Rec aRec = (Rec) recs.get(i);
         if (aRec.clickCheck(mouseX, mouseY)) {
-            if (i == 0) {
-                sendOSCMessage("couple");
-            } else if (i == 1) {
-                sendOSCMessage("rotate");
-            } else if (i == 2) {
-                sendOSCMessage("couple_rotate");
-            } else if (i == 3) {
-                sendOSCMessage("maximum_torque");
-            } else if (i == 4) {
-                sendOSCMessage("stop");
-            }
+          sendOSCMessage(osc_msg[i]);
         }
     }
 
@@ -129,7 +159,33 @@ void keyReleased() {
 
 void keyPressed() {
 
-    sendOSCMessage(new String(new char[]{key}));
+    //sendOSCMessage(new String(new char[]{key}));
+  String msg = "";  
+  
+  String h = String.valueOf(hour());
+  String m = String.valueOf(minute());
+  String s = String.valueOf(second());
+  String millis = String.valueOf(millis());
+  msg += h + ":" + m + ":" + s + "." + millis + ";";
+  
+  double p_x = 9.35;
+  double p_y = 1.23;
+  double p_z = 5.34;
+  
+  double angle_a = 123.42;
+  double angle_b = 114.32;
+  double angle_c = 238.84;
+  
+  msg += String.valueOf(p_x) + ";" + String.valueOf(p_y) + ";" + String.valueOf(p_z) + ";" +
+         String.valueOf(angle_a) + ";" + String.valueOf(angle_b) + ";" + String.valueOf(angle_c) + ";";
+  
+  boolean OutsideWorkspace = true;
+  boolean RobotReady = false;
+  msg += String.valueOf(OutsideWorkspace) + ";" + String.valueOf(RobotReady);
+  
+  println("msg: " + msg);
+  
+  udp_sender.send(msg, ip_to_send_UDP, port_to_send_UDP);
 
 }
 

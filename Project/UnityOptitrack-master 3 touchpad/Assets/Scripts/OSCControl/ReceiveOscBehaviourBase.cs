@@ -11,16 +11,12 @@ public abstract class ReceiveOscBehaviourBase : MonoBehaviour
 
 	private OscReceiveController m_ReceiveController;
 
-
 	private static ReceiveOscBehaviourBase _instance;
 
-	public static ReceiveOscBehaviourBase Instance
-	{
-		get
-		{
-			if(_instance == null)
-			{
-				Debug.Log("ReceiveOscBehaviourBase: Instance");
+	public static ReceiveOscBehaviourBase Instance {
+		get {
+			if (_instance == null) {
+				Debug.Log ("ReceiveOscBehaviourBase: Instance");
 			}
 			return _instance;
 		}

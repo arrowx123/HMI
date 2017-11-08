@@ -216,8 +216,8 @@ public class OptiTrack : MonoBehaviour
 //		GameController.getCurrentNutPosition ();
 
 
-		Debug.Log ("handle: " + handle.transform.rotation);
-		Debug.Log ("handle: " + handle.transform.position);
+//		Debug.Log ("handle: " + handle.transform.rotation);
+//		Debug.Log ("handle: " + handle.transform.position);
 
 		if (!receivePositionData) {
 //			handle.transform.position = diff_handle;
