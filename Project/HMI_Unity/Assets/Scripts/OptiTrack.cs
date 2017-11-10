@@ -18,11 +18,16 @@ public class OptiTrack : MonoBehaviour
 	private DetectCollision wrenchFittingController;
 	private GameController GameController;
 
-//	private float[] position_y = { -0.9f, -1.9f, -0.9f, -1.9f, -0.9f, -1.9f, -0.9f, -1.9f };
-//	private float[] position_z = { 0f, 0f, -1f, -1f, -2f, -2f, -3f, -3f };
-	private float[] position_y = { -1.3f, -3.3f, -1.3f, -3.3f, -1.3f, -3.3f, -1.3f, -3.3f };
-//	private float[] position_z = { 0f, 0f, -2f, -2f, -4f, -4f, -6f, -6f };
-	private float[] position_z = { 1f, 1f, -1f, -1f, -3f, -3f, -5f, -5f };
+	//	private float[] position_y = { -0.9f, -1.9f, -0.9f, -1.9f, -0.9f, -1.9f, -0.9f, -1.9f };
+	//	private float[] position_z = { 0f, 0f, -1f, -1f, -2f, -2f, -3f, -3f };
+	//	private float[] position_z = { 0f, 0f, -2f, -2f, -4f, -4f, -6f, -6f };
+
+	//	private float[] position_y = { -1.3f, -3.3f, -1.3f, -3.3f, -1.3f, -3.3f, -1.3f, -3.3f };
+	//	private float[] position_z = { 1f, 1f, -1f, -1f, -3f, -3f, -5f, -5f };
+
+
+	private float[] position_y = { -0.8f, -2.8f, -0.8f, -2.8f, -0.8f, -2.8f, -0.8f, -2.8f };
+	private float[] position_z = { 0f, 0f, -2f, -2f, -4f, -4f, -6f, -6f };
 
 	//	public Text log1;
 	//	public Text log2;
@@ -124,13 +129,15 @@ public class OptiTrack : MonoBehaviour
 		return roundNum;
 	}
 
-	public Vector3 get_handle_position(){
+	public Vector3 get_handle_position ()
+	{
 
 		return handle.transform.position;
 
 	}
 
-	public Vector3 get_handle_angle(){
+	public Vector3 get_handle_angle ()
+	{
 
 		return handle.transform.rotation.eulerAngles;
 
@@ -178,6 +185,25 @@ public class OptiTrack : MonoBehaviour
 			Debug.Log ("OptiTrack: can not find GameController");
 		}
 			
+		GameObject working_object_object = GameObject.FindWithTag ("working_object");
+		initialize_coupled_position (working_object_object);
+//		for (int i = 0; i < position_y.Length; i++) {
+//			position_y [i] += working_object_object.transform.position.y;
+//		}
+//		for (int i = 0; i < position_z.Length; i++) {
+//			position_z [i] += working_object_object.transform.position.z;
+//		}
+
+	}
+
+	void initialize_coupled_position (GameObject working_object_object)
+	{
+		for (int i = 0; i < position_y.Length; i++) {
+			position_y [i] += working_object_object.transform.position.y;
+		}
+		for (int i = 0; i < position_z.Length; i++) {
+			position_z [i] += working_object_object.transform.position.z;
+		}
 	}
 
 
