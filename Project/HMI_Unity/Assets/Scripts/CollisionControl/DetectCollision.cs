@@ -62,6 +62,21 @@ public class DetectCollision : MonoBehaviour
 		}
 	};
 
+	private GameObject wrenchFittingObject;
+
+	private const int flangeNutNum = 8;
+	private GameObject[] flangeNutObjects = new GameObject[flangeNutNum];
+	private string[] flangeNutTags = {
+		"flangenut_0",
+		"flangenut_1",
+		"flangenut_2",
+		"flangenut_3",
+		"flangenut_4",
+		"flangenut_5",
+		"flangenut_6",
+		"flangenut_7"
+	};
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -100,9 +115,35 @@ public class DetectCollision : MonoBehaviour
 		if (gameControllerObject != null) {
 			gameController = gameControllerObject.GetComponent<GameController> ();
 		}
-			
+
+		for (int i = 0; i < flangeNutNum; i++) {
+			flangeNutObjects [i] = GameObject.FindWithTag (flangeNutTags [i]);
+		}
+
+		wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
 	}
-	
+
+	public void send_collide_vibration ()
+	{
+		int subtask_index = gameController.get_subtask_index ();
+
+		Vector3 diff = wrenchFittingObject.transform.position - flangeNutObjects [subtask_index].transform.position;
+
+		if (Mathf.Abs (diff.z) > Mathf.Abs (diff.y)) {
+			if (diff.z < 0) {
+				gameController.send_collide_left_vibration ();
+			} else {
+				gameController.send_collide_right_vibration ();
+			}
+		} else {
+			if (diff.y > 0) {
+				gameController.send_collide_down_vibration ();
+			} else {
+				gameController.send_collide_up_vibration ();
+			}
+		}
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -117,6 +158,11 @@ public class DetectCollision : MonoBehaviour
 //		} else {
 //			stopCollisionSound ();
 //		}
+
+//		for (int i = 0; i < flangeNutObjects.Length; i++) {
+//			Debug.Log ("flangeNutPos: " + flangeNutObjects [i].transform.position.ToString ("F4"));
+//		}
+
 	}
 
 	//	void OnCollisionEnter(Collision col)
@@ -312,7 +358,8 @@ public class DetectCollision : MonoBehaviour
 		if (oriCollided != collided && collided && enable_sound) {
 			playCollisionSound ();
 //			gameController.stop_stop_vibration_coroutine ();
-			gameController.send_collide_vibration ();
+
+			send_collide_vibration ();
 			StartCoroutine (disableDisplay ());
 		} else if (collided) {
 
@@ -323,23 +370,23 @@ public class DetectCollision : MonoBehaviour
 			OutputSystemController.set_collision_warning (false);
 		}
 
-		if (collided) {
-			if (flange_collider_touched == 3) {
-				if (collide_direction == 1) {
-					gameController.send_collide_up_vibration ();
-				} else if (collide_direction == 2) {
-					gameController.send_collide_down_vibration ();
-				} else if (collide_direction == 3) {
-					gameController.send_collide_left_vibration ();
-				} else if (collide_direction == 4) {
-					gameController.send_collide_right_vibration ();
-				}
-			} else {
-				
-			}
-			Debug.Log ("collide_direction: " + collide_direction);
-			Debug.Log ("flange_collider_touched: " + flange_collider_touched);
-		}
+//		if (collided) {
+//			if (flange_collider_touched == 3) {
+//				if (collide_direction == 1) {
+//					gameController.send_collide_up_vibration ();
+//				} else if (collide_direction == 2) {
+//					gameController.send_collide_down_vibration ();
+//				} else if (collide_direction == 3) {
+//					gameController.send_collide_left_vibration ();
+//				} else if (collide_direction == 4) {
+//					gameController.send_collide_right_vibration ();
+//				}
+//			} else {
+//				
+//			}
+//			Debug.Log ("collide_direction: " + collide_direction);
+//			Debug.Log ("flange_collider_touched: " + flange_collider_touched);
+//		}
 
 //		if (collided) {
 //			StartCoroutine (disableDisplay ());
@@ -362,7 +409,7 @@ public class DetectCollision : MonoBehaviour
 
 		bool oriCollided = collided;
 		int collide_direction = -1;
-		int coupling_target = gameController.get_subtask_index();
+		int coupling_target = gameController.get_subtask_index ();
 		int flange_collider_touched = 0;
 
 		if (other.gameObject.tag.Contains (other_collider)) {
