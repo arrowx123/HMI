@@ -590,7 +590,7 @@ public class GameController : MonoBehaviour
 		//		OutputSystemController.set_completion_current_sign (true);
 
 		//		yield return new WaitForSeconds (0.35f);
-		yield return new WaitForSeconds (0.0f);
+		yield return new WaitForSeconds (0.35f);
 
 		if (hapticFeedback) {
 			OSCDataSenderController.send_rotate_message ();
@@ -797,7 +797,6 @@ public class GameController : MonoBehaviour
 				SceneManager.LoadScene (2);
 			}
 			return;
-		
 		}
 
 		if (drillBitSpeed != 0) {
