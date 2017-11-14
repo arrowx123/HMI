@@ -11,10 +11,12 @@ public class DetectCollision : MonoBehaviour
 	private OutputSystem OutputSystemController;
 	private SoundManager soundManagerController;
 	private GameController gameController;
-	private OscDataSender OSCDataSenderController;
+	//	private OscDataSender OSCDataSenderController;
+	private  IEnumerator disable_display_coroutine;
 
 	private bool coupleGeneral = false;
 	private bool enable_sound = true;
+	private bool disable_display_coroutine_running = false;
 
 	private bool[] bolt_trigger = { false, false, false, false, false, false, false, false };
 	private bool[,] flange_trigger = new bool[,] {
@@ -80,7 +82,7 @@ public class DetectCollision : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-
+		disable_display_coroutine = disableDisplay ();
 		GameObject GameControllerObject = GameObject.FindWithTag ("GameController");
 //		if (GameControllerObject != null) {
 //			SendVibrationSignalController = GameControllerObject.GetComponent<SendVibrationSignal> ();
@@ -106,10 +108,10 @@ public class DetectCollision : MonoBehaviour
 			Debug.Log ("GameController: Can not find SoundManager!");
 		}
 
-		GameObject OSCDataSenderObject = GameObject.FindWithTag ("OSCDataSender");
-		if (OSCDataSenderObject != null) {
-			OSCDataSenderController = OSCDataSenderObject.GetComponent<OscDataSender> ();
-		}
+//		GameObject OSCDataSenderObject = GameObject.FindWithTag ("OSCDataSender");
+//		if (OSCDataSenderObject != null) {
+//			OSCDataSenderController = OSCDataSenderObject.GetComponent<OscDataSender> ();
+//		}
 
 		GameObject gameControllerObject = GameObject.FindWithTag ("GameController");
 		if (gameControllerObject != null) {
@@ -148,10 +150,16 @@ public class DetectCollision : MonoBehaviour
 	void Update ()
 	{
 		if (collided) {
-//			StartCoroutine (disableDisplay ());
+			if (!disable_display_coroutine_running) {
+//				Debug.Log ("start coroutine");
+				StartCoroutine (disable_display_coroutine);
+			}
 		} else {
-			gameController.set2DCamera (true);
-			OutputSystemController.set_collision_warning (false);
+			if (!disable_display_coroutine_running) {//			StopCoroutine (disable_display_coroutine);
+				gameController.set2DCamera (true);
+				OutputSystemController.set_collision_warning (false);
+				disable_display_coroutine = disableDisplay ();
+			}
 		}
 //		if (collided) {
 //			playCollisionSound ();
@@ -215,31 +223,28 @@ public class DetectCollision : MonoBehaviour
 				break;
 			}
 		}
-
 		return coupleIndex;
 	}
 
 	private void playCollisionSound ()
 	{
-
 		soundManagerController.play_collision ();
-
 	}
 
 	private void stopCollisionSound ()
 	{
-
 		soundManagerController.stop_collision ();
-
 	}
 
 	IEnumerator disableDisplay ()
 	{
 		//		print (Time.time);
+		disable_display_coroutine_running = true;
+		Debug.Log ("disableDisplay()");
 		yield return new WaitForSeconds (0.2f);
 		gameController.set2DCamera (false);
 		OutputSystemController.set_collision_warning (true);
-
+		disable_display_coroutine_running = false;
 		//		print (Time.time);
 	}
 
@@ -256,7 +261,7 @@ public class DetectCollision : MonoBehaviour
 		Debug.Log ("enter here: " + other.gameObject.tag);
 
 		bool oriCollided = collided;
-		int collide_direction = -1;
+//		int collide_direction = -1;
 		int coupling_target = gameController.get_subtask_index ();
 		int flange_collider_touched = 0;
 
@@ -285,7 +290,7 @@ public class DetectCollision : MonoBehaviour
 						Debug.Log ("count j is: " + j);
 						flange_collider_touched++;
 					} else {
-						collide_direction = j;
+//						collide_direction = j;
 //						Debug.Log ("enter: j is: " + j);
 //						Debug.Log ("enter: coupling_target is: " + coupling_target);
 					}
@@ -360,14 +365,16 @@ public class DetectCollision : MonoBehaviour
 //			gameController.stop_stop_vibration_coroutine ();
 
 			send_collide_vibration ();
-			StartCoroutine (disableDisplay ());
+//			Debug.Log ("here");
+//			StartCoroutine (disable_display_coroutine);
 		} else if (collided) {
 
 //			gameController.stop_stop_vibration_coroutine ();
-			StartCoroutine (disableDisplay ());
+//			StartCoroutine (disable_display_coroutine);
 		} else {
-			gameController.set2DCamera (true);
-			OutputSystemController.set_collision_warning (false);
+//			StopCoroutine (disable_display_coroutine);
+//			gameController.set2DCamera (true);
+//			OutputSystemController.set_collision_warning (false);
 		}
 
 //		if (collided) {
@@ -408,9 +415,9 @@ public class DetectCollision : MonoBehaviour
 		Debug.Log ("exit here: " + other.gameObject.tag);
 
 		bool oriCollided = collided;
-		int collide_direction = -1;
-		int coupling_target = gameController.get_subtask_index ();
-		int flange_collider_touched = 0;
+//		int collide_direction = -1;
+//		int coupling_target = gameController.get_subtask_index ();
+//		int flange_collider_touched = 0;
 
 		if (other.gameObject.tag.Contains (other_collider)) {
 			other_trigger = false;
@@ -428,7 +435,7 @@ public class DetectCollision : MonoBehaviour
 			for (int j = 0; j < flange_trigger.GetLength (1); j++) {
 				if (other.gameObject.tag.Contains (flange_collider [i, j])) {
 					flange_trigger [i, j] = false;
-					collide_direction = j;
+//					collide_direction = j;
 					Debug.Log ("exit: j is: " + j);
 				}
 			}
@@ -516,14 +523,15 @@ public class DetectCollision : MonoBehaviour
 //			}
 //			Debug.Log ("collide_direction: " + collide_direction);
 
-			StartCoroutine (disableDisplay ());
+//			StartCoroutine (disable_display_coroutine);
 		} else if (collided) {
 
 //			gameController.stop_stop_vibration_coroutine ();
-			StartCoroutine (disableDisplay ());
+//			StartCoroutine (disable_display_coroutine);
 		} else {
-			gameController.set2DCamera (true);
-			OutputSystemController.set_collision_warning (false);
+//			StopCoroutine (disable_display_coroutine);
+//			gameController.set2DCamera (true);
+//			OutputSystemController.set_collision_warning (false);
 		}
 
 //		if (collided) {
