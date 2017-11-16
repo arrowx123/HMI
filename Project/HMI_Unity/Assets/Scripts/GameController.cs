@@ -56,7 +56,7 @@ public class GameController : MonoBehaviour
 
 	//	experiment parameters
 	public bool randomize_order = true;
-	public bool haptic_or_audio = true;
+	public bool haptic = true;
 	private bool hapticFeedback = true;
 
 	private SoundManager soundManagerController;
@@ -114,6 +114,9 @@ public class GameController : MonoBehaviour
 	private SceneParameterManager SceneParameterManagerController;
 	static private System.DateTime[] time_record = new System.DateTime[2 * round_cnt];
 
+	private IEnumerator start_vibration_coroutine;
+	private IEnumerator stop_vibration_coroutine;
+
 	public int get_subtask_index ()
 	{
 		if (subtask_index >= subtask_order.Length) {
@@ -157,10 +160,13 @@ public class GameController : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		Debug.Log ("Newly start!");
+//		Debug.Log ("Newly start!");
 		//		setMoverioController ();
 
-		if (haptic_or_audio) {
+		start_vibration_coroutine = startVibration ();
+		stop_vibration_coroutine = stopVibration ();
+
+		if (haptic) {
 			hapticFeedback = true;
 		} else {
 			hapticFeedback = false;
@@ -668,9 +674,6 @@ public class GameController : MonoBehaviour
 //
 //		}
 
-		IEnumerator start_vibration_coroutine = startVibration ();
-		IEnumerator stop_vibration_coroutine = stopVibration ();
-
 		bool output_warning = false;
 		bool finish_current_task = true;
 		bool finish_current_task_vibration_control = true;
@@ -823,6 +826,8 @@ public class GameController : MonoBehaviour
 					if (hapticFeedback) {
 //						OSCDataSenderController.send_maximum_torque_message ();
 						StopCoroutine (start_vibration_coroutine);
+						start_vibration_coroutine = startVibration ();
+
 //						Debug.Log ("first stopcoroutine startVibration!");
 
 						soundManagerController.stop_vibration ();
@@ -851,6 +856,7 @@ public class GameController : MonoBehaviour
 				} else if (wrenchFittingController.isCollided () == true) {
 					if (hapticFeedback) {
 						StopCoroutine (start_vibration_coroutine);
+						start_vibration_coroutine = startVibration ();
 //						Debug.Log ("second stopcoroutine startVibration!");
 
 						OSCDataSenderController.send_stop_message ();
@@ -892,6 +898,8 @@ public class GameController : MonoBehaviour
 				if (wrenchFittingController.isCollided () == true) {
 
 					StopCoroutine (stop_vibration_coroutine);
+					stop_vibration_coroutine = stopVibration ();
+
 					OSCDataSenderController.send_test_point ("test_point_2");
 
 //					OSCDataSenderController.send_collision_warning_message ();
@@ -914,6 +922,8 @@ public class GameController : MonoBehaviour
 					OSCDataSenderController.send_test_point ("test_point_3");
 					if (hapticFeedback) {
 						StopCoroutine (start_vibration_coroutine);
+						start_vibration_coroutine = startVibration ();
+
 						OSCDataSenderController.send_stop_message ();
 
 						soundManagerController.stop_vibration ();
