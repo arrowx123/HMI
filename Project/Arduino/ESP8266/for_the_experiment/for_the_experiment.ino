@@ -39,7 +39,7 @@ char *pass = "sre_lab_mcgill";
 String osc_msg[] = {"stop", "couple", "rotate", "maximum_torque",
                     "collide_up", "collide_down", "collide_left", "collide_right", "collide"};
 int osc_msg_num = 9;
-int direction_collide_parameter[] = {5, 8};
+int direction_collide_parameter[] = {4, 10};
 
 
 char OSCIP_char[20];
@@ -128,13 +128,13 @@ void set_erms() {
     }
 //  couple
     else if (motor_mode == 1) {
-        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
+        if (interval <= 4) {
             activate_all_erms(0);
             interval++;
-        } else if (interval == 5 || interval == 6 || interval == 7) {
+        } else if (interval <= 7) {
             activate_all_erms(3);
             interval++;
-        } else if (interval == 8) {
+        } else{
             motor_mode = last_motor_mode;
             interval = 0;
         }
