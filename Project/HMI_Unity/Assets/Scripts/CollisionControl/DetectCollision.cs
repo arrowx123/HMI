@@ -133,15 +133,15 @@ public class DetectCollision : MonoBehaviour
 
 		if (Mathf.Abs (diff.z) > Mathf.Abs (diff.y)) {
 			if (diff.z < 0) {
-				gameController.send_collide_left_vibration ();
-			} else {
 				gameController.send_collide_right_vibration ();
+			} else {
+				gameController.send_collide_left_vibration ();
 			}
 		} else {
 			if (diff.y > 0) {
-				gameController.send_collide_down_vibration ();
-			} else {
 				gameController.send_collide_up_vibration ();
+			} else {
+				gameController.send_collide_down_vibration ();
 			}
 		}
 	}
