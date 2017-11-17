@@ -125,8 +125,12 @@ public class DetectCollision : MonoBehaviour
 		wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
 	}
 
-	public void send_collide_vibration ()
+	public void send_collide_vibration (bool other_trigger)
 	{
+		if (other_trigger) {
+			gameController.send_collide_vibration ();
+			return;
+		}
 		int subtask_index = gameController.get_subtask_index ();
 
 		Vector3 diff = wrenchFittingObject.transform.position - flangeNutObjects [subtask_index].transform.position;
@@ -364,7 +368,7 @@ public class DetectCollision : MonoBehaviour
 			playCollisionSound ();
 //			gameController.stop_stop_vibration_coroutine ();
 
-			send_collide_vibration ();
+			send_collide_vibration (other_trigger);
 //			Debug.Log ("here");
 //			StartCoroutine (disable_display_coroutine);
 		} else if (collided) {
