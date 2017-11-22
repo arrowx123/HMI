@@ -116,6 +116,12 @@ public class GameController : MonoBehaviour
 	private IEnumerator stop_vibration_coroutine;
 	private bool calledStartVibration = false;
 
+	private MeshCollider wrench_fitting_mesh_collider;
+
+	private Shader wireframe_shader;
+	private Shader standard_shader;
+	private Renderer wireframe_renderer;
+
 	public int get_subtask_index ()
 	{
 		if (subtask_index >= subtask_order.Length) {
@@ -161,6 +167,16 @@ public class GameController : MonoBehaviour
 	{
 //		Debug.Log ("Newly start!");
 		//		setMoverioController ();
+
+		GameObject wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
+		if (wrenchFittingObject != null) {
+			wireframe_renderer = wrenchFittingObject.GetComponent<MeshRenderer> ();
+		}
+
+		standard_shader = Shader.Find ("Standard");
+		wireframe_shader = Shader.Find ("Battlehub/Wireframe");
+
+//		wireframe_renderer.material.shader = wireframe_shader;
 
 		start_vibration_coroutine = startVibration ();
 		stop_vibration_coroutine = stopVibration ();
@@ -277,7 +293,7 @@ public class GameController : MonoBehaviour
 			}
 		}
 
-		GameObject wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
+		wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
 		if (wrenchFittingObject != null) {
 
 			wrenchFittingController = wrenchFittingObject.GetComponent<DetectCollision> ();
@@ -617,6 +633,39 @@ public class GameController : MonoBehaviour
 
 		OutputSystemController.set_maximum_torque_warning (false);
 		//		print (Time.time);
+	}
+
+	//	void OnDrawGizmos() {
+	//		Gizmos.color = Color.yellow;
+	//
+	//		GameObject wrenchFittingObject = GameObject.FindWithTag ("WrenchFitting");
+	//		if (wrenchFittingObject != null) {
+	//			wrench_fitting_mesh_collider = wrenchFittingObject.GetComponent<MeshCollider> ();
+	//		}
+	//	public Shader shader1;
+	//	public Shader shader2;
+	//	public Renderer rend;
+	//	void Start() {
+	//		rend = GetComponent<Renderer>();
+	//		shader1 = Shader.Find("Diffuse");
+	//		shader2 = Shader.Find("Transparent/Diffuse");
+	//
+	//		if ( wrench_fitting_mesh_collider )
+	//		{
+	//			Gizmos.matrix = transform.localToWorldMatrix;
+	//			Gizmos.DrawWireCube(wrench_fitting_mesh_collider.transform.position, new Vector3(1, 1, 1));
+	////			Gizmos.DrawWireCube( Vector3.zero + wrench_fitting_mesh_collider.transform.position, wrench_fitting_mesh_collider.size );
+	//		}
+	//	}
+
+	void OnPreRender ()
+	{
+		GL.wireframe = true;
+	}
+
+	void OnPostRender ()
+	{
+		GL.wireframe = false;
 	}
 
 	private void setDrillBitRotation (float direction)
