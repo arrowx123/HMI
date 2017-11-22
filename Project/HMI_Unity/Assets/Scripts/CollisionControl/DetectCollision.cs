@@ -159,8 +159,8 @@ public class DetectCollision : MonoBehaviour
 				StartCoroutine (disable_display_coroutine);
 			}
 		} else {
-			if (!disable_display_coroutine_running) {//			StopCoroutine (disable_display_coroutine);
-				gameController.set2DCamera (true);
+			if (!disable_display_coroutine_running) {
+				enableDisplay ();
 				OutputSystemController.set_collision_warning (false);
 				disable_display_coroutine = disableDisplay ();
 			}
@@ -240,13 +240,22 @@ public class DetectCollision : MonoBehaviour
 		soundManagerController.stop_collision ();
 	}
 
+	void enableDisplay ()
+	{
+//		gameController.set2DCamera (true);
+		gameController.set_wrench_fitting_to_wire_frame(false);
+	}
+
 	IEnumerator disableDisplay ()
 	{
 		//		print (Time.time);
 		disable_display_coroutine_running = true;
 		Debug.Log ("disableDisplay()");
 		yield return new WaitForSeconds (0.2f);
-		gameController.set2DCamera (false);
+
+//		gameController.set2DCamera (false);
+		gameController.set_wrench_fitting_to_wire_frame(true);
+
 		OutputSystemController.set_collision_warning (true);
 		disable_display_coroutine_running = false;
 		//		print (Time.time);

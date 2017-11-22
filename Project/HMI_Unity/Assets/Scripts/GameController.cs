@@ -162,6 +162,14 @@ public class GameController : MonoBehaviour
 		_instance = this;
 	}
 
+	public void set_wrench_fitting_to_wire_frame (bool wire_frame)
+	{
+		if (wire_frame)
+			wireframe_renderer.material.shader = wireframe_shader;
+		else
+			wireframe_renderer.material.shader = standard_shader;
+	}
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -174,9 +182,8 @@ public class GameController : MonoBehaviour
 		}
 
 		standard_shader = Shader.Find ("Standard");
-		wireframe_shader = Shader.Find ("Battlehub/Wireframe");
+		wireframe_shader = Shader.Find ("Digicrafts/Wireframe/Unlit/Transparent Cutout");
 
-//		wireframe_renderer.material.shader = wireframe_shader;
 
 		start_vibration_coroutine = startVibration ();
 		stop_vibration_coroutine = stopVibration ();
