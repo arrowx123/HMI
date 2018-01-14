@@ -45,7 +45,8 @@ int direction_collide_parameter[] = {4, 10};
 char OSCIP_char[20];
 char msgChar[100];
 //String OSCIP = "132.206.74.142"; //mac
-String OSCIP = "132.206.74.162"; //Moverio
+//String OSCIP = "132.206.74.162"; //Moverio
+String OSCIP = "132.206.74.144"; //Windows
 
 // OSC address pattern
 char addressPattern[] = "/to_unity";
@@ -132,7 +133,7 @@ void set_erms() {
             activate_all_erms(0);
             interval++;
         } else if (interval <= 7) {
-            activate_all_erms(3);
+            activate_all_erms(4);
             interval++;
         } else{
             motor_mode = last_motor_mode;
@@ -221,77 +222,6 @@ void set_erms() {
         }
     }
 }
-
-//{"couple", "rotate", "couple_rotate", "maximum_torque", "stop", "collide"};
-//{"stop", "couple", "rotate", "maximum_torque","collide_up", "collide_down", "collide_left", "collide_right"};
-//void set_erm_0() {
-//
-//    static int interval = 0;
-//
-//    if (motor_mode == 0) {
-//        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
-//            motor_control(pwmValue[0]);
-//            interval++;
-//        } else if (interval == 5 || interval == 6 || interval == 7) {
-//            motor_control(pwmValue[1]);
-//            interval++;
-//        } else if (interval == 8) {
-//            motor_mode = last_motor_mode;
-//            interval = 0;
-//        }
-//    }
-//}
-//
-//void set_erm_1() {
-//    if (motor_mode == 1) {
-//        motor_control(pwmValue[3]);
-//    }
-//}
-//
-//void set_erm_2() {
-//    if (motor_mode == 2) {
-//        motor_control(pwmValue[3]);
-//    }
-//}
-//
-//void set_erm_3() {
-//    static int interval = 0;
-//    if (motor_mode == 3) {
-//        if (interval == 1) {
-//            motor_control(pwmValue[0]);
-//            interval++;
-//        } else if (interval == 4) {
-//            motor_control(pwmValue[4]);
-//        } else if (interval == 6) {
-//            interval = 0;
-//        }
-//        interval++;
-//    }
-//}
-//
-//void set_erm_4() {
-//    if (motor_mode == 4) {
-//        motor_control(pwmValue[0]);
-//    }
-//}
-//
-//void set_erm_5() {
-//
-//    static int interval = 0;
-//
-//    if (motor_mode == 5) {
-//        if (interval == 0 || interval == 1 || interval == 2 || interval == 3 || interval == 4) {
-//            motor_control(pwmValue[0]);
-//            interval++;
-//        } else if (interval == 5 || interval == 6) {
-//            motor_control(pwmValue[2]);
-//            interval++;
-//        } else if (interval == 7) {
-//            motor_mode = last_motor_mode;
-//            interval = 0;
-//        }
-//    }
-//}
 
 void setPin() {
     pinMode(trigger_drillBitControl, INPUT_PULLUP);
