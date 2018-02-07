@@ -19,9 +19,9 @@ public class UDPDataReceiver : MonoBehaviour
 	private double position_x;
 	private double position_y;
 	private double position_z;
-	private double angle_a;
-	private double angle_b;
-	private double angle_c;
+	//private double angle_a;
+	//private double angle_b;
+	//private double angle_c;
 	private bool outside_workspace;
 	private bool robot_ready;
 
@@ -42,9 +42,9 @@ public class UDPDataReceiver : MonoBehaviour
 		position_y = Convert.ToDouble (split [2]);
 		position_z = Convert.ToDouble (split [3]);
 
-		angle_a = Convert.ToDouble (split [4]);
-		angle_b = Convert.ToDouble (split [5]);
-		angle_c = Convert.ToDouble (split [6]);
+		//angle_a = Convert.ToDouble (split [4]);
+		//angle_b = Convert.ToDouble (split [5]);
+		//angle_c = Convert.ToDouble (split [6]);
 
 		outside_workspace = Convert.ToBoolean (split [7]);
 		robot_ready = Convert.ToBoolean (split [8]);
@@ -79,20 +79,20 @@ public class UDPDataReceiver : MonoBehaviour
 		return position_z;
 	}
 
-	public double get_angle_a ()
-	{
-		return angle_a;
-	}
+	//public double get_angle_a ()
+	//{
+	//	return angle_a;
+	//}
 
-	public double get_angle_b ()
-	{
-		return angle_b;
-	}
+	//public double get_angle_b ()
+	//{
+	//	return angle_b;
+	//}
 
-	public double get_angle_c ()
-	{
-		return angle_c;
-	}
+	//public double get_angle_c ()
+	//{
+	//	return angle_c;
+	//}
 
 	public Boolean get_outside_workspace ()
 	{
@@ -115,43 +115,63 @@ public class UDPDataReceiver : MonoBehaviour
 		udpListeningThread.Start ();
 	}
 
-	public void UdpListener ()
+    private void stopListenerThread()
+    {
+        udpListeningThread.Abort();
+    }
+    
+    public void UdpListener ()
 	{
 		receivingUdpClient = new UdpClient (portNumberReceive);
 
-		while (true) {
-			//Listening 
-			try {
-				IPEndPoint RemoteIpEndPoint = new IPEndPoint (IPAddress.Any, 0);
-				//IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Broadcast, 5000);
+        while (true)
+        {
+            //			//Listening 
+            try
+            {
+                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                //IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Broadcast, 5000);
 
-				// Blocks until a message returns on this socket from a remote host.
-				byte[] receiveBytes = receivingUdpClient.Receive (ref RemoteIpEndPoint);
+                // Blocks until a message returns on this socket from a remote host.
+                byte[] receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
 
-				if (receiveBytes != null) {
-					string return_data = Encoding.ASCII.GetString (receiveBytes);
-					Debug.Log ("Message Received: " + return_data.ToString ());
-					Debug.Log ("Address IP Sender: " + RemoteIpEndPoint.Address.ToString ());
-					Debug.Log ("Port Number Sender: " + RemoteIpEndPoint.Port.ToString ());
+                if (receiveBytes != null)
+                {
+                    string return_data = Encoding.ASCII.GetString(receiveBytes);
+                    Debug.Log("Message Received: " + return_data.ToString());
+                    Debug.Log("Address IP Sender: " + RemoteIpEndPoint.Address.ToString());
+                    Debug.Log("Port Number Sender: " + RemoteIpEndPoint.Port.ToString());
 
-					assign_values_from_UDP_packet (return_data);
+                    assign_values_from_UDP_packet(return_data);
 
-//					foreach (string s in split) {
-//						Debug.Log ("s: " + s);
-//					}
+                    //foreach (string s in split)
+                    //{
+                    //    Debug.Log("s: " + s);
+                    //}
 
-//					if (returnData.ToString () == "TextTest") {
-//						//Do something if TextTest is received
-//					}
-				}
-			} catch (Exception e) {
-				Debug.Log (e.ToString ());
-			}
-		}
-	}
+                    //if (returnData.ToString() == "TextTest")
+                    //{
+                    //    //Do something if TextTest is received
+                    //}
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.ToString());
+            }
+        }
+    }
 
-	void Start ()
-	{
-		initListenerThread ();
-	}
+    void Start()
+    {
+        initListenerThread();
+    }
+
+    void OnApplicationQuit()
+    {
+        udpListeningThread.Abort();
+        if (receivingUdpClient != null)
+            receivingUdpClient.Close();
+    }
+
 }

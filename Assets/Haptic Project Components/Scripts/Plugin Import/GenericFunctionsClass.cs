@@ -95,16 +95,16 @@ public class GenericFunctionsClass : MonoBehaviour
 
     void Start()
     {
-        while (true)
-        {
+        //while (true)
+        //{
             handleOriginalPos = get_position();
             Debug.Log("handleOriginalPos: " + handleOriginalPos);
 
-            if (handleOriginalPos.x > initial_pos_threshold || handleOriginalPos.y > initial_pos_threshold || handleOriginalPos.z > initial_pos_threshold)
-                continue;
-            else
-                break;
-        }
+        //    if (handleOriginalPos.x > initial_pos_threshold || handleOriginalPos.y > initial_pos_threshold || handleOriginalPos.z > initial_pos_threshold)
+        //        continue;
+        //    else
+        //        break;
+        //}
         
 
         handleLastPos = handleOriginalPos;

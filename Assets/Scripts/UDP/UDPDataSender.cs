@@ -27,10 +27,14 @@ public class UDPDataSender : MonoBehaviour
 	public double[] z_real_range = { -9999.9, 9999.9 };
 
 	//	private GameController gameController;
-	private OptiTrack optitrackController;
-	private UDPDataReceiver UDPController;
+	//private OptiTrack optitrackController;
+    private GenericFunctionsClass genericFunctionsClassController;
 
-	private Boolean within_standard_displacement;
+    private UDPDataReceiver UDPDataReceiverController;
+
+    public HapticClassScript myHapticClassScript;
+
+    private Boolean within_standard_displacement;
 
 	void initialize_UDP ()
 	{
@@ -52,23 +56,27 @@ public class UDPDataSender : MonoBehaviour
 //			gameController = gameControllerObject.GetComponent<GameController> ();
 //		}
 
-		GameObject optitrackControllerObject = GameObject.FindWithTag ("OptiTrack");
-		if (optitrackControllerObject != null) {
-			optitrackController = optitrackControllerObject.GetComponent<OptiTrack> ();
-		}
+		//GameObject optitrackControllerObject = GameObject.FindWithTag ("OptiTrack");
+		//if (optitrackControllerObject != null) {
+		//	optitrackController = optitrackControllerObject.GetComponent<OptiTrack> ();
+		//}
 
-		GameObject UDPControllerObject = GameObject.FindWithTag ("UDPReceiver");
-		if (UDPControllerObject != null) {
-			UDPController = UDPControllerObject.GetComponent<UDPDataReceiver> ();
+        GameObject genericFunctionsClassControllerObject = GameObject.FindWithTag("open_haptics");
+        if (genericFunctionsClassControllerObject != null)
+        {
+            genericFunctionsClassController = genericFunctionsClassControllerObject.GetComponent<GenericFunctionsClass>();
+        }
+
+        GameObject UDPDataReceiverControllerObject = GameObject.FindWithTag ("UDPReceiver");
+		if (UDPDataReceiverControllerObject != null) {
+            UDPDataReceiverController = UDPDataReceiverControllerObject.GetComponent<UDPDataReceiver> ();
 		}
 	}
 
-	public void send_UDP_to_robot (DateTime time, double position_x, double position_y, double position_z,
-	                               double angle_a, double angle_b, double angle_c)
+	public void send_UDP_to_robot (DateTime time, double position_x, double position_y, double position_z)
 	{
 		string text = time.ToString ("hh:mm:ss.fff") + ";" +
-		              position_x + ";" + position_y + ";" + position_z + ";" +
-		              angle_a + ";" + angle_b + ";" + angle_c;
+		              position_x + ";" + position_y + ";" + position_z;
 
 		byte[] send_buffer = Encoding.ASCII.GetBytes (text);
 		sock.SendTo (send_buffer, endPoint);
@@ -80,24 +88,19 @@ public class UDPDataSender : MonoBehaviour
 		return within_standard_displacement;
 	}
 
-	public Boolean get_standard_displacement (DateTime time, double position_x, double position_y, double position_z,
-	                                          double angle_a, double angle_b, double angle_c)
+	public Boolean get_standard_displacement (DateTime time, double position_x, double position_y, double position_z)
 	{
 
-		DateTime rec_time = UDPController.get_time ();
-		double rec_p_x = UDPController.get_position_x ();
-		double rec_p_y = UDPController.get_position_y ();
-		double rec_p_z = UDPController.get_position_z ();
-	
-		double rec_a_a = UDPController.get_angle_a ();
-		double rec_a_b = UDPController.get_angle_b ();
-		double rec_a_c = UDPController.get_angle_c ();
+		DateTime rec_time = UDPDataReceiverController.get_time ();
+		double rec_p_x = UDPDataReceiverController.get_position_x ();
+		double rec_p_y = UDPDataReceiverController.get_position_y ();
+		double rec_p_z = UDPDataReceiverController.get_position_z ();
 
 		double displacement_pos = Math.Abs (rec_p_x - position_x) + Math.Abs (rec_p_y - position_y) + Math.Abs (rec_p_z - position_z);
-		double displacement_angle = Math.Abs (rec_a_a - angle_a) + Math.Abs (rec_a_b - angle_b) + Math.Abs (rec_a_c - angle_c);
+		//double displacement_angle = Math.Abs (rec_a_a - angle_a) + Math.Abs (rec_a_b - angle_b) + Math.Abs (rec_a_c - angle_c);
 
 		double duration = (rec_time - time).Milliseconds;
-		if (displacement_pos / duration < displacement_threshold_pos && displacement_angle / duration < displacement_angle) {
+		if (displacement_pos / duration < displacement_threshold_pos) {
 			return true;
 		} else
 			return false;
@@ -109,25 +112,32 @@ public class UDPDataSender : MonoBehaviour
 	{
 
 		DateTime time = DateTime.Now;
-		double position_x = optitrackController.get_handle_position ().x;
-		double position_y = optitrackController.get_handle_position ().y;
-		double position_z = optitrackController.get_handle_position ().z;
 
-		position_x = x_real_range [0] + (x_real_range [1] - x_real_range [0]) / (x_boundary [1] - x_boundary [0]) * (position_x - x_boundary [0]);
+  //      double position_x = optitrackController.get_handle_position ().x;
+		//double position_y = optitrackController.get_handle_position ().y;
+		//double position_z = optitrackController.get_handle_position ().z;
+        double position_x = myHapticClassScript.hapticCursor.transform.position.x;
+        double position_y = myHapticClassScript.hapticCursor.transform.position.y;
+        double position_z = myHapticClassScript.hapticCursor.transform.position.z;
+
+        position_x = x_real_range [0] + (x_real_range [1] - x_real_range [0]) / (x_boundary [1] - x_boundary [0]) * (position_x - x_boundary [0]);
 		position_y = y_real_range [0] + (y_real_range [1] - y_real_range [0]) / (y_boundary [1] - y_boundary [0]) * (position_y - y_boundary [0]);
 		position_z = z_real_range [0] + (z_real_range [1] - z_real_range [0]) / (z_boundary [1] - z_boundary [0]) * (position_z - z_boundary [0]);
 
-		double angle_a = optitrackController.get_handle_angle ().x;
-		double angle_b = optitrackController.get_handle_angle ().y;
-		double angle_c = optitrackController.get_handle_angle ().z;
+		//double angle_a = optitrackController.get_handle_angle ().x;
+		//double angle_b = optitrackController.get_handle_angle ().y;
+		//double angle_c = optitrackController.get_handle_angle ().z;
 
-		if (UDPController.is_initialized () && UDPController.get_robot_ready ())
-			send_UDP_to_robot (time, position_x, position_y, position_z, angle_a, angle_b, angle_c);
+		if (UDPDataReceiverController.is_initialized () && UDPDataReceiverController.get_robot_ready())
+        {
+            //send_UDP_to_robot(time, position_x, position_y, position_z, angle_a, angle_b, angle_c);
+            send_UDP_to_robot(time, position_x, position_y, position_z);
+        }
 
-		within_standard_displacement = get_standard_displacement (time, position_x, position_y, position_z,
-			angle_a, angle_b, angle_c);
+		//within_standard_displacement = get_standard_displacement (time, position_x, position_y, position_z,
+			//angle_a, angle_b, angle_c);
+        within_standard_displacement = get_standard_displacement(time, position_x, position_y, position_z);
 
-//		Debug.Log ("Time.deltaTime: " + Time.deltaTime);
-		//		sock.Close ();
-	}
+        //		Debug.Log ("Time.deltaTime: " + Time.deltaTime);
+    }
 }
