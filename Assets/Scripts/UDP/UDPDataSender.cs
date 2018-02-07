@@ -32,7 +32,7 @@ public class UDPDataSender : MonoBehaviour
 
     private UDPDataReceiver UDPDataReceiverController;
 
-    public HapticClassScript myHapticClassScript;
+    //public HapticClassScript myHapticClassScript;
 
     private Boolean within_standard_displacement;
 
@@ -110,28 +110,31 @@ public class UDPDataSender : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-
+        //Debug.Log("UDPDataSender: Upate.");
 		DateTime time = DateTime.Now;
 
   //      double position_x = optitrackController.get_handle_position ().x;
 		//double position_y = optitrackController.get_handle_position ().y;
 		//double position_z = optitrackController.get_handle_position ().z;
-        double position_x = myHapticClassScript.hapticCursor.transform.position.x;
-        double position_y = myHapticClassScript.hapticCursor.transform.position.y;
-        double position_z = myHapticClassScript.hapticCursor.transform.position.z;
+        double position_x = genericFunctionsClassController.get_haptic_cursor_position().x;
+        double position_y = genericFunctionsClassController.get_haptic_cursor_position().y;
+        double position_z = genericFunctionsClassController.get_haptic_cursor_position().z;
 
         position_x = x_real_range [0] + (x_real_range [1] - x_real_range [0]) / (x_boundary [1] - x_boundary [0]) * (position_x - x_boundary [0]);
 		position_y = y_real_range [0] + (y_real_range [1] - y_real_range [0]) / (y_boundary [1] - y_boundary [0]) * (position_y - y_boundary [0]);
 		position_z = z_real_range [0] + (z_real_range [1] - z_real_range [0]) / (z_boundary [1] - z_boundary [0]) * (position_z - z_boundary [0]);
 
-		//double angle_a = optitrackController.get_handle_angle ().x;
-		//double angle_b = optitrackController.get_handle_angle ().y;
-		//double angle_c = optitrackController.get_handle_angle ().z;
+        //double angle_a = optitrackController.get_handle_angle ().x;
+        //double angle_b = optitrackController.get_handle_angle ().y;
+        //double angle_c = optitrackController.get_handle_angle ().z;
 
-		if (UDPDataReceiverController.is_initialized () && UDPDataReceiverController.get_robot_ready())
+        //Debug.Log("UDPDataReceiverController.is_initialized (): " + UDPDataReceiverController.is_initialized());
+        //Debug.Log("UDPDataReceiverController.get_robot_ready (): " + UDPDataReceiverController.get_robot_ready());
+        if (UDPDataReceiverController.is_initialized () && UDPDataReceiverController.get_robot_ready())
         {
             //send_UDP_to_robot(time, position_x, position_y, position_z, angle_a, angle_b, angle_c);
             send_UDP_to_robot(time, position_x, position_y, position_z);
+            //Debug.Log("Sent data through UDP.");
         }
 
 		//within_standard_displacement = get_standard_displacement (time, position_x, position_y, position_z,

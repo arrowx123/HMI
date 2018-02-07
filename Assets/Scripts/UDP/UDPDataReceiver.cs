@@ -24,6 +24,7 @@ public class UDPDataReceiver : MonoBehaviour
 	//private double angle_c;
 	private bool outside_workspace;
 	private bool robot_ready;
+    private bool can_assign_value = true;
 
 	private bool initialized = false;
 
@@ -34,30 +35,44 @@ public class UDPDataReceiver : MonoBehaviour
 
 	private void assign_values_from_UDP_packet (string return_data)
 	{
+        can_assign_value = false;
+        Debug.Log("UDPDataReceiver: assign_values_from_UDP_packet");
 		string[] stringSeparators = new string[] { ";" };
 		string[] split = return_data.Split (stringSeparators, StringSplitOptions.None);
 
+        foreach(string s in split)
+        {
+            Debug.Log("s: " + s);
+        }
+
 		time = Convert.ToDateTime (split [0]);
-		position_x = Convert.ToDouble (split [1]);
-		position_y = Convert.ToDouble (split [2]);
-		position_z = Convert.ToDouble (split [3]);
+        Debug.Log("time: " + time);
 
-		//angle_a = Convert.ToDouble (split [4]);
-		//angle_b = Convert.ToDouble (split [5]);
-		//angle_c = Convert.ToDouble (split [6]);
+        position_x = Convert.ToDouble (split [1]);
+        Debug.Log("position_x: " + position_x);
 
-		outside_workspace = Convert.ToBoolean (split [7]);
-		robot_ready = Convert.ToBoolean (split [8]);
+        position_y = Convert.ToDouble (split [2]);
+        Debug.Log("position_y: " + position_y);
 
-		//					Debug.Log("time: " + time);
-		//					Debug.Log("position_x: " + position_x);
-		//					Debug.Log("angle_a: " + angle_a);
-		//					Debug.Log("outside_workspace: " + outside_workspace);
-		//					Debug.Log("robot_ready: " + robot_ready);
+        position_z = Convert.ToDouble (split [3]);
+        Debug.Log("position_z: " + position_z);
 
-		initialized = true;
+        //angle_a = Convert.ToDouble (split [4]);
+        //angle_b = Convert.ToDouble (split [5]);
+        //angle_c = Convert.ToDouble (split [6]);
 
-	}
+        outside_workspace = Convert.ToBoolean (split [4]);
+        Debug.Log("outside_workspace: " + outside_workspace);
+
+        robot_ready = Convert.ToBoolean (split [5]);
+        Debug.Log("robot_ready: " + robot_ready);
+
+        //Debug.Log("angle_a: " + angle_a);
+
+        initialized = true;
+        can_assign_value = true;
+
+    }
 
 	public DateTime get_time ()
 	{
@@ -142,7 +157,8 @@ public class UDPDataReceiver : MonoBehaviour
                     Debug.Log("Address IP Sender: " + RemoteIpEndPoint.Address.ToString());
                     Debug.Log("Port Number Sender: " + RemoteIpEndPoint.Port.ToString());
 
-                    assign_values_from_UDP_packet(return_data);
+                    if(can_assign_value)
+                        assign_values_from_UDP_packet(return_data);
 
                     //foreach (string s in split)
                     //{

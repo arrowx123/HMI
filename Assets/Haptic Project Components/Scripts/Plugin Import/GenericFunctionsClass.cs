@@ -97,8 +97,9 @@ public class GenericFunctionsClass : MonoBehaviour
     {
         //while (true)
         //{
-            handleOriginalPos = get_position();
-            Debug.Log("handleOriginalPos: " + handleOriginalPos);
+        //handleOriginalPos = get_position();
+        handleOriginalPos = new Vector3(0f, 0f, 0f);
+        Debug.Log("handleOriginalPos: " + handleOriginalPos);
 
         //    if (handleOriginalPos.x > initial_pos_threshold || handleOriginalPos.y > initial_pos_threshold || handleOriginalPos.z > initial_pos_threshold)
         //        continue;
@@ -370,7 +371,7 @@ public class GenericFunctionsClass : MonoBehaviour
             return;
 
         handleCurrentPos = get_position();
-        Debug.Log("process_position: " + handleCurrentPos);
+        //Debug.Log("process_position: " + handleCurrentPos);
 
         Vector3 diff_handle = (handleCurrentPos - handleOriginalPos) * smoothPos;
         Vector3 final_position;
@@ -421,10 +422,13 @@ public class GenericFunctionsClass : MonoBehaviour
             handleLastPos = handleCurrentPos;
         }
 
-        Debug.Log("final_position: " + final_position);
+        //Debug.Log("final_position: " + final_position);
         myHapticClassScript.hapticCursor.transform.position = final_position;
     }
 
+    public Vector3 get_haptic_cursor_position() {
+        return myHapticClassScript.hapticCursor.transform.position;
+    }
     private void process_orientation()
     {
         myHapticClassScript.hapticCursor.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
