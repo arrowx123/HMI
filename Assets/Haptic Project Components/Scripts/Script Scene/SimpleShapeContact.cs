@@ -57,8 +57,7 @@ public class SimpleShapeContact : HapticClassScript {
 		}
 		else
 			Debug.Log("Haptic Device cannot be launched");
-
-        Debug.Log("Here1!");
+        
 		/***************************************************************/
 		//Set Environmental Haptic Effect
 		/***************************************************************/
@@ -75,8 +74,7 @@ public class SimpleShapeContact : HapticClassScript {
         //Setup the Haptic Geometry in the OpenGL context 
         //And read haptic characteristics
         /***************************************************************/
-
-        Debug.Log("Here2!");
+        
         myGenericFunctionsClassScript.SetHapticGeometry();
 		
 		//Get the Number of Haptic Object

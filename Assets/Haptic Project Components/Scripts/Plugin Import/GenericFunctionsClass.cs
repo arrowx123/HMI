@@ -12,6 +12,7 @@ public class GenericFunctionsClass : MonoBehaviour
     /*************************************************************/
     // Variables
     /*************************************************************/
+    public float initial_pos_threshold = 10.0f;
 
     //Haptic Properties
     private HapticProperties myHapticPropertiesScript;
@@ -94,7 +95,18 @@ public class GenericFunctionsClass : MonoBehaviour
 
     void Start()
     {
-        handleOriginalPos = get_position();
+        while (true)
+        {
+            handleOriginalPos = get_position();
+            Debug.Log("handleOriginalPos: " + handleOriginalPos);
+
+            if (handleOriginalPos.x > initial_pos_threshold || handleOriginalPos.y > initial_pos_threshold || handleOriginalPos.z > initial_pos_threshold)
+                continue;
+            else
+                break;
+        }
+        
+
         handleLastPos = handleOriginalPos;
 
         GameObject wrenchFittingObject = GameObject.FindWithTag("WrenchFitting");
@@ -116,6 +128,26 @@ public class GenericFunctionsClass : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
+        //handleOriginalPos = get_position();
+        //Debug.Log("handleOriginalPos: " + handleOriginalPos);
+
+        //handleLastPos = handleOriginalPos;
+
+        //GameObject wrenchFittingObject = GameObject.FindWithTag("WrenchFitting");
+        //if (wrenchFittingObject != null)
+        //{
+
+        //    wrenchFittingController = wrenchFittingObject.GetComponent<DetectCollision>();
+
+        //}
+        //else
+        //{
+        //    Debug.Log("OptiTrack: can not find wrenchFittingController");
+        //}
+
+        //GameObject working_object_object = GameObject.FindWithTag("working_object");
+        //initialize_coupled_position(working_object_object);
+
         GameObject GameControllerObject = GameObject.FindWithTag("GameController");
         if (GameControllerObject != null)
             GameController = GameControllerObject.GetComponent<GameController>();
@@ -338,6 +370,8 @@ public class GenericFunctionsClass : MonoBehaviour
             return;
 
         handleCurrentPos = get_position();
+        Debug.Log("process_position: " + handleCurrentPos);
+
         Vector3 diff_handle = (handleCurrentPos - handleOriginalPos) * smoothPos;
         Vector3 final_position;
 
@@ -387,7 +421,7 @@ public class GenericFunctionsClass : MonoBehaviour
             handleLastPos = handleCurrentPos;
         }
 
-
+        Debug.Log("final_position: " + final_position);
         myHapticClassScript.hapticCursor.transform.position = final_position;
     }
 

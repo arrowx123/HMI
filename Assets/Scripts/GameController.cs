@@ -423,7 +423,7 @@ public class GameController : MonoBehaviour
         for (int i = 0; i < subtask_cnt; i++)
         {
             string tmp = "arrow_indicator_" + (char)(i + '0');
-            Debug.Log(tmp);
+            //Debug.Log(tmp);
             current_arrow_indicator[i] = GameObject.FindWithTag(tmp);
         }
 
