@@ -148,7 +148,7 @@ public class OptiTrack : MonoBehaviour
 	void Awake ()
 	{
 		_instance = this;
-		receivePositionData = GameController.Instance.receivePositionData;
+		receivePositionData = GameController.Instance.get_receivePositionData();
 	}
 
 
@@ -287,7 +287,6 @@ public class OptiTrack : MonoBehaviour
 				Vector3 lastPos = newPos + handleOriginalPos;
 //				new Vector3 (handleOriginalPos.x + newPos.x, handleLastPos.y, handleLastPos.z);
 
-				
 				handle.transform.position = newPos;
 				handleLastPos = lastPos;
 

@@ -210,11 +210,11 @@ public class OutputSystem : MonoBehaviour
 
 
 		/** display the position & rotation information of Handle & Moverio **/
-		handleOriginalPos = optiTrack.returnHandleOriginalPos ();
-		handleCurrentPos = optiTrack.returnHandleCurrentPos ();
+		//handleOriginalPos = optiTrack.returnHandleOriginalPos ();
+		//handleCurrentPos = optiTrack.returnHandleCurrentPos ();
 
-		handleOriginalRot = optiTrack.returnHandleOriginalRot ();
-		handleCurrentRot = optiTrack.returnHandleCurrentRot ();
+		//handleOriginalRot = optiTrack.returnHandleOriginalRot ();
+		//handleCurrentRot = optiTrack.returnHandleCurrentRot ();
 
 //		moverioOriginalPos = optiTrack.returnMoverioOriginalPos ();
 		//moverioCurrentPos = optiTrack.returnMoverioCurrentPos ();
@@ -222,7 +222,7 @@ public class OutputSystem : MonoBehaviour
 //		moverioOriginalRot = optiTrack.returnMoverioOriginalRot ();
 		//moverioCurrentRot = optiTrack.returnMoverioCurrentRot ();
 
-		smoothPos = optiTrack.returnSmoothPos ();
+		//smoothPos = optiTrack.returnSmoothPos ();
 
 
 

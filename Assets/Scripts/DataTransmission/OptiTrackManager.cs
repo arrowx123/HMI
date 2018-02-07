@@ -29,7 +29,7 @@ public class OptiTrackManager : MonoBehaviour
     {
         instance = this;
 
-        receivePositionData = GameController.Instance.receivePositionData;
+        receivePositionData = GameController.Instance.get_receivePositionData();
     }
 
     ~OptiTrackManager()

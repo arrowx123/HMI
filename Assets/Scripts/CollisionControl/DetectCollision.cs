@@ -148,22 +148,22 @@ public class DetectCollision : MonoBehaviour
         {
             if (diff.z < 0)
             {
-                gameController.send_collide_right_vibration();
+                gameController.send_collide_left_vibration();
             }
             else
             {
-                gameController.send_collide_left_vibration();
+                gameController.send_collide_right_vibration();
             }
         }
         else
         {
             if (diff.y > 0)
             {
-                gameController.send_collide_up_vibration();
+                gameController.send_collide_down_vibration();
             }
             else
             {
-                gameController.send_collide_down_vibration();
+                gameController.send_collide_up_vibration();
             }
         }
     }
@@ -259,12 +259,14 @@ public class DetectCollision : MonoBehaviour
 
     private void playCollisionSound()
     {
-        soundManagerController.play_collision();
+        if (gameController.get_enable_collision_sound())
+            soundManagerController.play_collision();
     }
 
     private void stopCollisionSound()
     {
-        soundManagerController.stop_collision();
+        if (gameController.get_enable_collision_sound())
+            soundManagerController.stop_collision();
     }
 
     void enableDisplay()
@@ -277,7 +279,7 @@ public class DetectCollision : MonoBehaviour
     {
         //		print (Time.time);
         disable_display_coroutine_running = true;
-        Debug.Log("disableDisplay()");
+        //Debug.Log("disableDisplay()");
         yield return new WaitForSeconds(0.2f);
 
         //		gameController.set2DCamera (false);
@@ -299,7 +301,7 @@ public class DetectCollision : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("enter here: " + other.gameObject.tag);
+        //Debug.Log("enter here: " + other.gameObject.tag);
 
         bool oriCollided = collided;
         //		int collide_direction = -1;
@@ -336,7 +338,7 @@ public class DetectCollision : MonoBehaviour
                 {
                     if (flange_trigger[i, j])
                     {
-                        Debug.Log("count j is: " + j);
+                        //Debug.Log("count j is: " + j);
                         flange_collider_touched++;
                     }
                     else
@@ -483,7 +485,7 @@ public class DetectCollision : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        Debug.Log("exit here: " + other.gameObject.tag);
+        //Debug.Log("exit here: " + other.gameObject.tag);
 
         bool oriCollided = collided;
         //		int collide_direction = -1;
@@ -501,9 +503,6 @@ public class DetectCollision : MonoBehaviour
                 bolt_trigger[i] = false;
         }
 
-        //		Debug.Log (flange_trigger.GetLength (0));
-        //		Debug.Log (flange_trigger.GetLength (1));
-
         for (int i = 0; i < flange_trigger.GetLength(0); i++)
         {
             for (int j = 0; j < flange_trigger.GetLength(1); j++)
@@ -512,7 +511,7 @@ public class DetectCollision : MonoBehaviour
                 {
                     flange_trigger[i, j] = false;
                     //					collide_direction = j;
-                    Debug.Log("exit: j is: " + j);
+                    //Debug.Log("exit: j is: " + j);
                 }
             }
         }
@@ -520,11 +519,6 @@ public class DetectCollision : MonoBehaviour
         bool hasCouple = false;
         for (int i = 0; i < flange_collider.GetLength(0); i++)
         {
-
-            //			Debug.Log ("bolt_trigger: " + bolt_trigger [i]);
-
-            //			if (!bolt_trigger [i] && !flange_trigger [i, 0] && flange_trigger [i, 1] && flange_trigger [i, 2]) {
-
             bool judge = true;
             for (int j = 0; j < flange_collider.GetLength(1); j++)
             {

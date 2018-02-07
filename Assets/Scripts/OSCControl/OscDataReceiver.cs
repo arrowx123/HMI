@@ -96,19 +96,18 @@ public class OscDataReceiver : ReceiveOscBehaviourBase
 //		Debug.Log("message.Count: " + message.Count); 
 
 		for (int i = 0; i < message.Count; i++) {
-			
-//			Debug.Log (message [i].GetType ());
-//			Debug.Log (message [i]);
 
+            //Debug.Log(message[i].GetType());
+            //Debug.Log(message[i]);
 
-//			if (message [i].Equals ("p")) {
-//				triggerControlDown
-//			}
+            //			if (message [i].Equals ("p")) {
+            //				triggerControlDown
+            //			}
 
-			string currentString = message [i].ToString ();
+            string currentString = message [i].ToString ();
 
 			if (currentString.Equals ("start_vibration")) {
-				Debug.Log ("Receive string: " + currentString);
+				//Debug.Log ("Receive string: " + currentString);
 				triggerControl = true;
 
 			} else if (currentString.Equals ("stop_vibration")) {
