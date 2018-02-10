@@ -4,6 +4,22 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System;
+using System.Threading;
+using System.Runtime.InteropServices;
+
+
+struct udp_data_format
+{
+ public   double time; // 8 bytes
+    public double x;
+    public double y;
+    public double z;
+    public double a;
+    public double b;
+    public double c;
+    public double outsideWorkspace;
+    public double robotReady;
+}
 
 public class UDPDataSender : MonoBehaviour
 {
@@ -12,10 +28,16 @@ public class UDPDataSender : MonoBehaviour
 	IPAddress serverAddr;
 	IPEndPoint endPoint;
 
-	public int port = 9997;
-	public string ip_address = "127.0.0.1";
+	//public int target_port = 9997;
+    public int target_port = 6910;
+	//public string ip_address = "127.0.0.1";
+ //   public string ip_address = "142.157.27.42";
+ //laval robot
+    //public string ip_address = "132.203.102.14"
+    public string ip_address = "132.206.74.144";
 
-	public double displacement_threshold_pos = 1.0f;
+
+    public double displacement_threshold_pos = 0.001f;
 	public double displacement_threshold_ang = 1.0f;
 
 	public double[] x_boundary = { -5, 5 };
@@ -43,7 +65,7 @@ public class UDPDataSender : MonoBehaviour
 			ProtocolType.Udp);
 
 		serverAddr = IPAddress.Parse (ip_address);
-		endPoint = new IPEndPoint (serverAddr, port);
+		endPoint = new IPEndPoint (serverAddr, target_port);
 	}
 
 	// Use this for initialization
@@ -73,25 +95,26 @@ public class UDPDataSender : MonoBehaviour
 		}
 	}
 
-	public void send_UDP_to_robot (DateTime time, double position_x, double position_y, double position_z)
+	public void send_UDP_to_robot (double time, double position_x, double position_y, double position_z)
 	{
-		string text = time.ToString ("hh:mm:ss.fff") + ";" +
-		              position_x + ";" + position_y + ";" + position_z;
+        //string text = time.ToString ("hh:mm:ss.fff") + ";" +
+        //              position_x + ";" + position_y + ";" + position_z;
+        string text = time + ";" + position_x + ";" + position_y + ";" + position_z;
 
-		byte[] send_buffer = Encoding.ASCII.GetBytes (text);
+        byte[] send_buffer = Encoding.ASCII.GetBytes (text);
 		sock.SendTo (send_buffer, endPoint);
-//		Debug.Log ("Send UDP data");
-	}
+        Debug.Log("Send UDP data: " + text);
+    }
 
 	public Boolean get_within_standard_displacement ()
 	{
 		return within_standard_displacement;
 	}
 
-	public Boolean get_standard_displacement (DateTime time, double position_x, double position_y, double position_z)
+	public Boolean get_standard_displacement (double time, double position_x, double position_y, double position_z)
 	{
 
-		DateTime rec_time = UDPDataReceiverController.get_time ();
+        double rec_time = UDPDataReceiverController.get_local_time ();
 		double rec_p_x = UDPDataReceiverController.get_position_x ();
 		double rec_p_y = UDPDataReceiverController.get_position_y ();
 		double rec_p_z = UDPDataReceiverController.get_position_z ();
@@ -99,19 +122,36 @@ public class UDPDataSender : MonoBehaviour
 		double displacement_pos = Math.Abs (rec_p_x - position_x) + Math.Abs (rec_p_y - position_y) + Math.Abs (rec_p_z - position_z);
 		//double displacement_angle = Math.Abs (rec_a_a - angle_a) + Math.Abs (rec_a_b - angle_b) + Math.Abs (rec_a_c - angle_c);
 
-		double duration = (rec_time - time).Milliseconds;
+		double duration = (rec_time - time);
 		if (displacement_pos / duration < displacement_threshold_pos) {
 			return true;
 		} else
 			return false;
 	}
 
+    byte[] getBytes(udp_data_format str)
+    {
+        int size = Marshal.SizeOf(str);
+        byte[] arr = new byte[size];
+        IntPtr ptr = Marshal.AllocHGlobal(size);
 
-	// Update is called once per frame
-	void Update ()
+        Marshal.StructureToPtr(str, ptr, true);
+        Marshal.Copy(ptr, arr, 0, size);
+        Marshal.FreeHGlobal(ptr);
+
+        return arr;
+    }
+
+    // Update is called once per frame
+    void Update ()
 	{
         //Debug.Log("UDPDataSender: Upate.");
-		DateTime time = DateTime.Now;
+        //DateTime time = DateTime.Now;
+
+
+        //Debug.Log(DateTime.Now.Ticks);
+
+        double time = Time.realtimeSinceStartup;
 
   //      double position_x = optitrackController.get_handle_position ().x;
 		//double position_y = optitrackController.get_handle_position ().y;
@@ -124,6 +164,24 @@ public class UDPDataSender : MonoBehaviour
 		position_y = y_real_range [0] + (y_real_range [1] - y_real_range [0]) / (y_boundary [1] - y_boundary [0]) * (position_y - y_boundary [0]);
 		position_z = z_real_range [0] + (z_real_range [1] - z_real_range [0]) / (z_boundary [1] - z_boundary [0]) * (position_z - z_boundary [0]);
 
+        double random_double = (new System.Random()).NextDouble();
+        udp_data_format tmp;
+        tmp.time = random_double+0.1f;
+        tmp.x = random_double + 0.2f;
+        tmp.y = random_double + 0.3f;
+        tmp.z = random_double + 0.4f;
+        tmp.a = random_double + 0.5f;
+        tmp.b = random_double + 0.6f;
+        tmp.c = random_double + 0.7f;
+        tmp.outsideWorkspace = random_double + 0.8f;
+        tmp.robotReady = random_double + 0.9f;
+
+        byte[] send_buffer = getBytes(tmp);
+        //byte[] send_buffer = Encoding.ASCII.GetBytes(tmp.ToString());
+        sock.SendTo(send_buffer, endPoint);
+        Debug.Log("Send UDP data: " + tmp.ToString());
+        System.Threading.Thread.Sleep(1000);
+
         //double angle_a = optitrackController.get_handle_angle ().x;
         //double angle_b = optitrackController.get_handle_angle ().y;
         //double angle_c = optitrackController.get_handle_angle ().z;
@@ -133,7 +191,8 @@ public class UDPDataSender : MonoBehaviour
         if (UDPDataReceiverController.is_initialized () && UDPDataReceiverController.get_robot_ready())
         {
             //send_UDP_to_robot(time, position_x, position_y, position_z, angle_a, angle_b, angle_c);
-            send_UDP_to_robot(time, position_x, position_y, position_z);
+            double relative_time = time - UDPDataReceiverController.get_local_time() + UDPDataReceiverController.get_remote_time();
+            //send_UDP_to_robot(time, position_x, position_y, position_z);
             //Debug.Log("Sent data through UDP.");
         }
 

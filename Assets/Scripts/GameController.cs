@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
+//using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+//using System;
+
+
 using System.Runtime.InteropServices;
 
 
@@ -477,7 +481,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        //Debug.Log(Time.realtimeSinceStartup);
         if (!initialized)
         {
             for (int i = 0; i < subtask_cnt; i++)

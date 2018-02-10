@@ -15,14 +15,16 @@ public class UDPDataReceiver : MonoBehaviour
 	public int portNumberReceive = 5000;
 	UdpClient receivingUdpClient;
 
-	private DateTime time;
+	//private DateTime time;
+    private double remote_time;
+    private double local_time;
 	private double position_x;
 	private double position_y;
 	private double position_z;
-	//private double angle_a;
-	//private double angle_b;
-	//private double angle_c;
-	private bool outside_workspace;
+    private double angle_a;
+    private double angle_b;
+    private double angle_c;
+    private bool outside_workspace;
 	private bool robot_ready;
     private bool can_assign_value = true;
 
@@ -40,46 +42,50 @@ public class UDPDataReceiver : MonoBehaviour
 		string[] stringSeparators = new string[] { ";" };
 		string[] split = return_data.Split (stringSeparators, StringSplitOptions.None);
 
-        foreach(string s in split)
-        {
-            Debug.Log("s: " + s);
-        }
+        //foreach(string s in split)
+        //{
+        //    Debug.Log("s: " + s);
+        //}
 
-		time = Convert.ToDateTime (split [0]);
-        Debug.Log("time: " + time);
+		//time = Convert.ToDateTime (split [0]);
+        remote_time = Convert.ToDouble(split[0]);
+        local_time = Time.realtimeSinceStartup;
+        //Debug.Log("time: " + time);
 
         position_x = Convert.ToDouble (split [1]);
-        Debug.Log("position_x: " + position_x);
+        //Debug.Log("position_x: " + position_x);
 
         position_y = Convert.ToDouble (split [2]);
-        Debug.Log("position_y: " + position_y);
+        //Debug.Log("position_y: " + position_y);
 
         position_z = Convert.ToDouble (split [3]);
-        Debug.Log("position_z: " + position_z);
+        //Debug.Log("position_z: " + position_z);
 
-        //angle_a = Convert.ToDouble (split [4]);
-        //angle_b = Convert.ToDouble (split [5]);
-        //angle_c = Convert.ToDouble (split [6]);
+        angle_a = Convert.ToDouble(split[4]);
+        angle_b = Convert.ToDouble(split[5]);
+        angle_c = Convert.ToDouble(split[6]);
 
-        outside_workspace = Convert.ToBoolean (split [4]);
-        Debug.Log("outside_workspace: " + outside_workspace);
+        robot_ready = Convert.ToBoolean(split[7]);
+        //Debug.Log("robot_ready: " + robot_ready);
 
-        robot_ready = Convert.ToBoolean (split [5]);
-        Debug.Log("robot_ready: " + robot_ready);
-
-        //Debug.Log("angle_a: " + angle_a);
+        outside_workspace = Convert.ToBoolean (split [8]);
+        //Debug.Log("outside_workspace: " + outside_workspace);
 
         initialized = true;
         can_assign_value = true;
-
     }
 
-	public DateTime get_time ()
-	{
-		return time;
+    //public DateTime get_time ()
+    public double get_local_time()
+    {
+		return local_time;
 	}
+    public double get_remote_time()
+    {
+        return remote_time;
+    }
 
-	public double get_position_x ()
+    public double get_position_x ()
 	{
 		return position_x;
 	}
@@ -153,6 +159,7 @@ public class UDPDataReceiver : MonoBehaviour
                 if (receiveBytes != null)
                 {
                     string return_data = Encoding.ASCII.GetString(receiveBytes);
+                    //double return_data = Encoding.ASCII.get
                     Debug.Log("Message Received: " + return_data.ToString());
                     Debug.Log("Address IP Sender: " + RemoteIpEndPoint.Address.ToString());
                     Debug.Log("Port Number Sender: " + RemoteIpEndPoint.Port.ToString());
@@ -173,7 +180,7 @@ public class UDPDataReceiver : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.Log(e.ToString());
+                //Debug.Log(e.ToString());
             }
         }
     }
