@@ -15,6 +15,9 @@ public class UDPDataReceiver : MonoBehaviour
 	public int portNumberReceive = 5000;
 	UdpClient receivingUdpClient;
 
+    private int receive_msg_size = 56;
+    private static int double_bytes_number = 8;
+
 	//private DateTime time;
     private double remote_time;
     private double local_time;
@@ -35,44 +38,44 @@ public class UDPDataReceiver : MonoBehaviour
 		return initialized;
 	}
 
-	private void assign_values_from_UDP_packet (string return_data)
+	private void assign_values_from_UDP_packet (double[] return_data)
 	{
-        can_assign_value = false;
-        Debug.Log("UDPDataReceiver: assign_values_from_UDP_packet");
-		string[] stringSeparators = new string[] { ";" };
-		string[] split = return_data.Split (stringSeparators, StringSplitOptions.None);
+  //      can_assign_value = false;
+  //      Debug.Log("UDPDataReceiver: assign_values_from_UDP_packet");
+		//string[] stringSeparators = new string[] { ";" };
+		//string[] split = return_data.Split (stringSeparators, StringSplitOptions.None);
 
-        //foreach(string s in split)
-        //{
-        //    Debug.Log("s: " + s);
-        //}
+  //      //foreach(string s in split)
+  //      //{
+  //      //    Debug.Log("s: " + s);
+  //      //}
 
-		//time = Convert.ToDateTime (split [0]);
-        remote_time = Convert.ToDouble(split[0]);
-        local_time = Time.realtimeSinceStartup;
-        //Debug.Log("time: " + time);
+		////time = Convert.ToDateTime (split [0]);
+  //      remote_time = Convert.ToDouble(split[0]);
+  //      local_time = Time.realtimeSinceStartup;
+  //      //Debug.Log("time: " + time);
 
-        position_x = Convert.ToDouble (split [1]);
-        //Debug.Log("position_x: " + position_x);
+  //      position_x = Convert.ToDouble (split [1]);
+  //      //Debug.Log("position_x: " + position_x);
 
-        position_y = Convert.ToDouble (split [2]);
-        //Debug.Log("position_y: " + position_y);
+  //      position_y = Convert.ToDouble (split [2]);
+  //      //Debug.Log("position_y: " + position_y);
 
-        position_z = Convert.ToDouble (split [3]);
-        //Debug.Log("position_z: " + position_z);
+  //      position_z = Convert.ToDouble (split [3]);
+  //      //Debug.Log("position_z: " + position_z);
 
-        angle_a = Convert.ToDouble(split[4]);
-        angle_b = Convert.ToDouble(split[5]);
-        angle_c = Convert.ToDouble(split[6]);
+  //      angle_a = Convert.ToDouble(split[4]);
+  //      angle_b = Convert.ToDouble(split[5]);
+  //      angle_c = Convert.ToDouble(split[6]);
 
-        robot_ready = Convert.ToBoolean(split[7]);
-        //Debug.Log("robot_ready: " + robot_ready);
+  //      robot_ready = Convert.ToBoolean(split[7]);
+  //      //Debug.Log("robot_ready: " + robot_ready);
 
-        outside_workspace = Convert.ToBoolean (split [8]);
-        //Debug.Log("outside_workspace: " + outside_workspace);
+  //      outside_workspace = Convert.ToBoolean (split [8]);
+  //      //Debug.Log("outside_workspace: " + outside_workspace);
 
-        initialized = true;
-        can_assign_value = true;
+  //      initialized = true;
+  //      can_assign_value = true;
     }
 
     //public DateTime get_time ()
@@ -140,7 +143,29 @@ public class UDPDataReceiver : MonoBehaviour
     {
         udpListeningThread.Abort();
     }
-    
+
+    public static double[] BAToDouble(byte[] bytes, int size)
+    {
+        int len = size / double_bytes_number;
+        double[] values = new double[len];
+
+        for(int i = 0; i < len; i ++)
+        {
+            int index = i * double_bytes_number;
+            values[i] = BitConverter.ToDouble(bytes, index);
+        }
+
+        for(int i = 0; i < len; i++)
+        {
+            Debug.Log(values[i]);
+        }
+
+
+        return values;
+        //Console.WriteLine(formatter, index,
+        //    BitConverter.ToString(bytes, index, 8), value);
+    }
+
     public void UdpListener ()
 	{
 		receivingUdpClient = new UdpClient (portNumberReceive);
@@ -155,12 +180,12 @@ public class UDPDataReceiver : MonoBehaviour
 
                 // Blocks until a message returns on this socket from a remote host.
                 byte[] receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
+                
+                Debug.Log("receiveBytes.Length: " + receiveBytes.Length);
 
-                if (receiveBytes != null)
+                if (receiveBytes != null && receiveBytes.Length == receive_msg_size)
                 {
-                    string return_data = Encoding.ASCII.GetString(receiveBytes);
-                    //double return_data = Encoding.ASCII.get
-                    Debug.Log("Message Received: " + return_data.ToString());
+                    double[] return_data = BAToDouble(receiveBytes, receive_msg_size);
                     Debug.Log("Address IP Sender: " + RemoteIpEndPoint.Address.ToString());
                     Debug.Log("Port Number Sender: " + RemoteIpEndPoint.Port.ToString());
 

@@ -184,7 +184,7 @@ public class UDPDataSender : MonoBehaviour
         //byte[] send_buffer = Encoding.ASCII.GetBytes(tmp.ToString());
         sock.SendTo(send_buffer, endPoint);
         Debug.Log("Send UDP data: " + tmp.ToString());
-        System.Threading.Thread.Sleep(1000);
+        //System.Threading.Thread.Sleep(1000);
 
         //double angle_a = optitrackController.get_handle_angle ().x;
         //double angle_b = optitrackController.get_handle_angle ().y;
