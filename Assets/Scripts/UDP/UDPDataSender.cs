@@ -27,12 +27,14 @@ public class UDPDataSender : MonoBehaviour
 	Socket sock;
 	IPAddress serverAddr;
 	IPEndPoint endPoint;
+    EndPoint source_endPoint;
 
-	//public int target_port = 9997;
+    //public int target_port = 9997;
     public int target_port = 6910;
-	//public string ip_address = "127.0.0.1";
- //   public string ip_address = "142.157.27.42";
- //laval robot
+    public int source_port = 6912;
+    //public string ip_address = "127.0.0.1";
+    //   public string ip_address = "142.157.27.42";
+    //laval robot
     //public string ip_address = "132.203.102.14"
     public string ip_address = "132.206.74.144";
 
@@ -65,7 +67,9 @@ public class UDPDataSender : MonoBehaviour
 			ProtocolType.Udp);
 
 		serverAddr = IPAddress.Parse (ip_address);
-		endPoint = new IPEndPoint (serverAddr, target_port);
+        endPoint = new IPEndPoint(serverAddr, target_port);
+        source_endPoint = new IPEndPoint(IPAddress.Any, source_port);
+        sock.Bind(source_endPoint);
 	}
 
 	// Use this for initialization
