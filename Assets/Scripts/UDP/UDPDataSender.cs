@@ -36,7 +36,7 @@ public class UDPDataSender : MonoBehaviour
     //laval robot
     //public string ip_address = "132.203.102.14"
     //public string ip_address = "132.206.74.144";
-    public string target_ip = "132.203.102.138";
+    public string target_ip = "132.203.102.138"; // Laval University
 
     public double displacement_threshold_pos = 0.001f;
     public double displacement_threshold_ang = 1.0f;
@@ -65,8 +65,6 @@ public class UDPDataSender : MonoBehaviour
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
             ProtocolType.Udp);
 
-        serverAddr = IPAddress.Parse(target_ip);
-        endPoint = new IPEndPoint(serverAddr, target_port);
         source_endPoint = new IPEndPoint(IPAddress.Any, port_send);
         sock.Bind(source_endPoint);
     }
@@ -103,7 +101,16 @@ public class UDPDataSender : MonoBehaviour
     {
 
         byte[] send_buffer = getBytes(data_to_send);
+        
+        //serverAddr = IPAddress.Parse(target_ip);
+        endPoint = new IPEndPoint(UDPDataReceiverController.get_target_ip(), UDPDataReceiverController.get_target_port());
         sock.SendTo(send_buffer, endPoint);
+        
+        Debug.LogFormat(
+            "SENT: time: {0} pose: {1:0.00} {2:0.00} {3:0.00} {4:0.00} {5:0.00} {6:0.00}",
+            data_to_send.time, data_to_send.x, data_to_send.y, data_to_send.z,
+            data_to_send.a, data_to_send.b, data_to_send.c
+        );
         //Debug.Log("Send UDP data.");
     }
 

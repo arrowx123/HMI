@@ -17,8 +17,10 @@ public class UDPDataReceiver : MonoBehaviour
 
     private int receive_msg_size = 72;
     private static int double_bytes_number = 8;
+    private int target_port;
+    private IPAddress target_ip;
 
-	//private DateTime time;
+    //private DateTime time;
     private double remote_time;
     private double local_time;
 	private double position_x;
@@ -31,17 +33,17 @@ public class UDPDataReceiver : MonoBehaviour
 	private bool robot_ready;
     private bool can_assign_value = true;
 
-	//private bool initialized = false;
+    //private bool initialized = false;
 
-	//public bool is_initialized ()
-	//{
-	//	return initialized;
-	//}
+    //public bool is_initialized ()
+    //{
+    //	return initialized;
+    //}
 
-	private void assign_values_from_UDP_packet (double[] return_data)
+    private void assign_values_from_UDP_packet (double[] return_data)
 	{
         can_assign_value = false;
-        Debug.Log("UDPDataReceiver: assign_values_from_UDP_packet");
+        //Debug.Log("UDPDataReceiver: assign_values_from_UDP_packet");
 
         //time = Convert.ToDateTime (split [0]);
         remote_time = return_data[0];
@@ -63,15 +65,15 @@ public class UDPDataReceiver : MonoBehaviour
 
         outside_workspace = return_data[7] == 0 ? false : true;
         robot_ready = return_data[8] == 0 ? false : true;
+        //robot_ready = true;
 
-        Debug.Log(  
-            remote_time + "\t" +
-            position_x + "\t" + position_y + "\t" + position_z + "\t" +
-            angle_a + "\t" + angle_b + "\t" + angle_c + "\t" +
-            outside_workspace + "\t" + robot_ready
+        Debug.LogFormat(
+            "RECV: time: {0} pose: {1:0.00} {2:0.00} {3:0.00} {4:0.00} {5:0.00} {6:0.00} other: {7} {8}",
+            remote_time, position_x, position_y, position_z,
+            angle_a, angle_b, angle_c,
+            outside_workspace, robot_ready
             );
 
-        //initialized = true;
         can_assign_value = true;
     }
 
@@ -125,7 +127,18 @@ public class UDPDataReceiver : MonoBehaviour
 		return robot_ready;
 	}
 
-	private void initListenerThread ()
+    public int get_target_port()
+    {
+        return target_port;
+    }
+
+    public IPAddress get_target_ip()
+    {
+        return target_ip;
+    }
+
+
+    private void initListenerThread ()
 	{
 
 		Debug.Log ("Started on : " + portNumberReceive.ToString ());
@@ -180,9 +193,11 @@ public class UDPDataReceiver : MonoBehaviour
                 if (receiveBytes != null && receiveBytes.Length == receive_msg_size)
                 {
                     double[] return_data = BAToDouble(receiveBytes, receive_msg_size);
-                    Debug.Log("Received packets from: " + RemoteIpEndPoint.Address.ToString() + ":" + RemoteIpEndPoint.Port.ToString());
+                    //Debug.Log("Received packets from: " + RemoteIpEndPoint.Address.ToString() + ":" + RemoteIpEndPoint.Port.ToString());
+                    target_port = RemoteIpEndPoint.Port;
+                    target_ip = RemoteIpEndPoint.Address;
 
-                    if(can_assign_value)
+                    if (can_assign_value)
                         assign_values_from_UDP_packet(return_data);
                 }
             }
