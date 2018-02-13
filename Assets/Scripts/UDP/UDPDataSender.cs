@@ -28,16 +28,10 @@ public class UDPDataSender : MonoBehaviour
     IPAddress serverAddr;
     IPEndPoint endPoint;
     EndPoint source_endPoint;
-    
-    public int target_port = 65413;
-    public int port_send = 6912;
-    //public string ip_address = "127.0.0.1";
-    //   public string ip_address = "142.157.27.42";
-    //laval robot
-    //public string ip_address = "132.203.102.14"
-    //public string ip_address = "132.206.74.144";
-    public string target_ip = "132.203.102.138"; // Laval University
 
+    Thread udpSenderThread;
+    private UdpClient udpClient;
+    
     public double displacement_threshold_pos = 0.001f;
     public double displacement_threshold_ang = 1.0f;
 
@@ -58,21 +52,10 @@ public class UDPDataSender : MonoBehaviour
     //public HapticClassScript myHapticClassScript;
 
     private Boolean within_standard_displacement;
-
-    void initialize_UDP()
-    {
-
-        sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
-            ProtocolType.Udp);
-
-        source_endPoint = new IPEndPoint(IPAddress.Any, port_send);
-        sock.Bind(source_endPoint);
-    }
-
+    
     // Use this for initialization
     void Start()
     {
-        initialize_UDP();
 
         //		GameObject gameControllerObject = GameObject.FindWithTag ("GameController");
         //		if (gameControllerObject != null) {
@@ -89,12 +72,20 @@ public class UDPDataSender : MonoBehaviour
         {
             genericFunctionsClassController = genericFunctionsClassControllerObject.GetComponent<GenericFunctionsClass>();
         }
+        else {
+            Debug.Log("UDPDataSender: genericFunctionsClassController NULL");
+        }
 
         GameObject UDPDataReceiverControllerObject = GameObject.FindWithTag("UDPReceiver");
         if (UDPDataReceiverControllerObject != null)
         {
             UDPDataReceiverController = UDPDataReceiverControllerObject.GetComponent<UDPDataReceiver>();
         }
+        else
+        {
+            Debug.Log("UDPDataSender: UDPDataReceiverController NULL");
+        }
+        
     }
 
     void send_UDP_to_robot(udp_data_format data_to_send)
@@ -102,16 +93,17 @@ public class UDPDataSender : MonoBehaviour
 
         byte[] send_buffer = getBytes(data_to_send);
         
-        //serverAddr = IPAddress.Parse(target_ip);
-        endPoint = new IPEndPoint(UDPDataReceiverController.get_target_ip(), UDPDataReceiverController.get_target_port());
-        sock.SendTo(send_buffer, endPoint);
+        Debug.Log("UDPDataReceiverController.get_target_ip(): " + UDPDataReceiverController.get_target_ip());
+        Debug.Log("UDPDataReceiverController.get_target_port(): " + UDPDataReceiverController.get_target_port());
+        
+        UDPDataReceiverController.udp_send_data(send_buffer);
+        Debug.Log("send_buffer.Length: " + send_buffer.Length);
         
         Debug.LogFormat(
             "SENT: time: {0} pose: {1:0.00} {2:0.00} {3:0.00} {4:0.00} {5:0.00} {6:0.00}",
             data_to_send.time, data_to_send.x, data_to_send.y, data_to_send.z,
             data_to_send.a, data_to_send.b, data_to_send.c
         );
-        //Debug.Log("Send UDP data.");
     }
 
     public Boolean get_within_standard_displacement()
@@ -139,6 +131,19 @@ public class UDPDataSender : MonoBehaviour
     //        return false;
     //}
 
+    byte[] getBytes(double db)
+    {
+        int size = Marshal.SizeOf(db);
+        byte[] arr = new byte[size];
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+
+        Marshal.StructureToPtr(db, ptr, true);
+        Marshal.Copy(ptr, arr, 0, size);
+        Marshal.FreeHGlobal(ptr);
+
+        return arr;
+    }
+
     byte[] getBytes(udp_data_format str)
     {
         int size = Marshal.SizeOf(str);
@@ -152,8 +157,7 @@ public class UDPDataSender : MonoBehaviour
         return arr;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UdpSender()
     {
         double time = Time.realtimeSinceStartup;
 
@@ -163,9 +167,13 @@ public class UDPDataSender : MonoBehaviour
 
         //Debug.Log(position_x + "\t" + position_y + "\t" + position_z + "\t");
 
-        position_x = x_real_range[0] + (x_real_range[1] - x_real_range[0]) / (x_boundary[1] - x_boundary[0]) * (position_x - x_boundary[0]);
-        position_y = y_real_range[0] + (y_real_range[1] - y_real_range[0]) / (y_boundary[1] - y_boundary[0]) * (position_y - y_boundary[0]);
-        position_z = z_real_range[0] + (z_real_range[1] - z_real_range[0]) / (z_boundary[1] - z_boundary[0]) * (position_z - z_boundary[0]);
+        position_x = (position_x * 1000) - 1350;
+        position_y = (position_y * 1000) - 850;
+        //position_z *= 1000;
+
+        //position_x = x_real_range[0] + (x_real_range[1] - x_real_range[0]) / (x_boundary[1] - x_boundary[0]) * (position_x - x_boundary[0]);
+        //position_y = y_real_range[0] + (y_real_range[1] - y_real_range[0]) / (y_boundary[1] - y_boundary[0]) * (position_y - y_boundary[0]);
+        //position_z = z_real_range[0] + (z_real_range[1] - z_real_range[0]) / (z_boundary[1] - z_boundary[0]) * (position_z - z_boundary[0]);
 
         //Debug.Log(position_x + "\t" + position_y + "\t" + position_z + "\t");
 
@@ -178,15 +186,20 @@ public class UDPDataSender : MonoBehaviour
         data_to_send.a = 0.0f;
         data_to_send.b = 0.0f;
         data_to_send.c = 0.0f;
-
-        //Debug.Log("UDPDataReceiverController.is_initialized (): " + UDPDataReceiverController.is_initialized());
+        
         //Debug.Log("UDPDataReceiverController.get_robot_ready (): " + UDPDataReceiverController.get_robot_ready());
         if (UDPDataReceiverController.get_robot_ready())
         {
             //double relative_time = time - UDPDataReceiverController.get_local_time() + UDPDataReceiverController.get_remote_time();
             send_UDP_to_robot(data_to_send);
         }
-        
+
         //within_standard_displacement = get_standard_displacement(time, position_x, position_y, position_z);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UdpSender();
     }
 }
